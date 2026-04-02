@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Login | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Staff Login{% endblock %}
+
+{% block content %}
+<section class="auth-layout">
+    <article class="auth-showcase">
+        <div class="brand-mark large">WB</div>
+        <p class="eyebrow">Internal access only</p>
+        <h2>WINBIRD Enterprise Rental Operations</h2>
+        <p class="auth-copy">A focused internal system for managing rental bookings, stock movement, fulfilment, and manual payment tracking.</p>
+        <div class="auth-feature-list">
+            <div class="auth-feature">
+                <strong>Booking control</strong>
+                <span>Create and track requests from first call to completed return.</span>
+            </div>
+            <div class="auth-feature">
+                <strong>Inventory visibility</strong>
+                <span>Monitor available stock, low inventory pressure, and active dispatches.</span>
+            </div>
+            <div class="auth-feature">
+                <strong>Operations history</strong>
+                <span>Review booking confirmations, payments, and fulfilment activity in one workflow.</span>
+            </div>
+        </div>
+    </article>
+
+    <section class="auth-card">
+        <div>
+            <p class="eyebrow">Staff sign in</p>
+            <h3>Access your workspace</h3>
+            <p class="auth-card-copy">Use your assigned internal account to continue.</p>
+        </div>
+
+        <form method="post" class="stacked-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="field-group">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}<div class="field-error">{{ form.username.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group">
+                <label for="{{ form.password.id_for_label }}">Password</label>
+                {{ form.password }}
+                {% if form.password.errors %}<div class="field-error">{{ form.password.errors|join:", " }}</div>{% endif %}
+            </div>
+            <button type="submit" class="primary-btn full-width">Sign in</button>
+        </form>
+    </section>
+</section>
+{% endblock %}

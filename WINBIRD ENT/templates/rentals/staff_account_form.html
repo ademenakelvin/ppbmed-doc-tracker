@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Staff Account | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Edit Staff Account{% endblock %}
+{% block page_intro %}Update the selected staff login, adjust contact details, or choose whether this staff member can confirm bookings.{% endblock %}
+
+{% block content %}
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Team access</p>
+            <h3>{{ staff_user.get_full_name|default:staff_user.username }}</h3>
+        </div>
+    </div>
+
+    <form method="post" class="stacked-form">
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+            <div class="form-errors">{{ form.non_field_errors }}</div>
+        {% endif %}
+        <div class="field-grid">
+            <div class="field-group">
+                <label for="{{ form.username.id_for_label }}">Username</label>
+                {{ form.username }}
+                {% if form.username.errors %}<div class="field-error">{{ form.username.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group">
+                <label for="{{ form.email.id_for_label }}">Email</label>
+                {{ form.email }}
+                {% if form.email.errors %}<div class="field-error">{{ form.email.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group">
+                <label for="{{ form.first_name.id_for_label }}">First name</label>
+                {{ form.first_name }}
+                {% if form.first_name.errors %}<div class="field-error">{{ form.first_name.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group">
+                <label for="{{ form.last_name.id_for_label }}">Last name</label>
+                {{ form.last_name }}
+                {% if form.last_name.errors %}<div class="field-error">{{ form.last_name.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group checkbox-group full-span">
+                {{ form.is_booking_approver }}
+                <label for="{{ form.is_booking_approver.id_for_label }}">This staff member can confirm bookings</label>
+                {% if form.is_booking_approver.errors %}<div class="field-error">{{ form.is_booking_approver.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group checkbox-group full-span">
+                {{ form.is_active }}
+                <label for="{{ form.is_active.id_for_label }}">Account is active</label>
+                {% if form.is_active.errors %}<div class="field-error">{{ form.is_active.errors|join:", " }}</div>{% endif %}
+            </div>
+        </div>
+        <div class="page-actions">
+            <button type="submit" class="primary-btn">Save changes</button>
+            <a class="secondary-btn" href="{% url 'settings' %}#staff-management">Back to settings</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

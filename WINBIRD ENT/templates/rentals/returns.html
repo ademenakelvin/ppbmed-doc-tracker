@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}Return Tracker | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Return Tracker{% endblock %}
+{% block page_intro %}Monitor overdue returns, items currently out, and jobs due back today so dispatch follow-up stays visible.{% endblock %}
+
+{% block content %}
+<section class="stats-grid">
+    <article class="stat-card">
+        <p>Overdue Returns</p>
+        <strong>{{ overdue_returns|length }}</strong>
+        <span>Bookings that should already have been returned.</span>
+    </article>
+    <article class="stat-card">
+        <p>Due Today</p>
+        <strong>{{ returns_due_today|length }}</strong>
+        <span>Confirmed bookings expected back on {{ today }}.</span>
+    </article>
+    <article class="stat-card">
+        <p>Items Still Out</p>
+        <strong>{{ items_out|length }}</strong>
+        <span>Confirmed jobs with items already dispatched.</span>
+    </article>
+</section>
+
+<section class="content-grid two-column">
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Priority follow-up</p>
+                <h3>Overdue returns</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for booking in overdue_returns %}
+                <div class="stack-item">
+                    <strong>#{{ booking.pk }} | {{ booking.customer.name }}</strong>
+                    <small>Due back {{ booking.return_due_date }}</small>
+                    <small>Created by {{ booking.created_by }}</small>
+                    <small><a href="{% url 'booking-detail' booking.pk %}">Open booking</a></small>
+                </div>
+            {% empty %}
+                <p class="muted-copy muted-copy-dark">No overdue returns right now.</p>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Today's return list</p>
+                <h3>Due back on schedule</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for booking in returns_due_today %}
+                <div class="stack-item">
+                    <strong>#{{ booking.pk }} | {{ booking.customer.name }}</strong>
+                    <small>Return due {{ booking.return_due_date }}</small>
+                    <small><a href="{% url 'booking-detail' booking.pk %}">Open booking</a></small>
+                </div>
+            {% empty %}
+                <p class="muted-copy muted-copy-dark">No returns are due today.</p>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Active dispatches</p>
+            <h3>Bookings with items still out</h3>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking</th>
+                    <th>Customer</th>
+                    <th>Event Date</th>
+                    <th>Return Due</th>
+                    <th>Payment</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in items_out %}
+                    <tr>
+                        <td>#{{ booking.pk }}</td>
+                        <td>{{ booking.customer.name }}</td>
+                        <td>{{ booking.event_date }}</td>
+                        <td>{{ booking.return_due_date }}</td>
+                        <td><span class="status-pill" data-status="{{ booking.payment_status }}">{{ booking.get_payment_status_display }}</span></td>
+                        <td><a href="{% url 'booking-detail' booking.pk %}">Open</a></td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6">No items are currently out.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

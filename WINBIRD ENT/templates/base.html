@@ -1,0 +1,104 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}WINBIRD Enterprise{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'rentals/css/app.css' %}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body class="{% if request.user.is_authenticated %}app-body{% else %}auth-body{% endif %}">
+    {% if request.user.is_authenticated %}
+        <div class="app-shell">
+            <aside class="sidebar">
+                <div class="brand-block">
+                    <div class="brand-row">
+                        <div class="brand-mark">WB</div>
+                        <div>
+                            <h1 class="brand-title">WINBIRD Enterprise</h1>
+                        </div>
+                    </div>
+                    <p class="brand-copy">Internal rental operations workspace.</p>
+                </div>
+                <div class="sidebar-section">
+                    <p class="sidebar-label">Workspace</p>
+                    <nav class="sidebar-nav">
+                        <a class="{% if request.resolver_match.url_name == 'dashboard' or request.resolver_match.url_name == 'admin-dashboard' or request.resolver_match.url_name == 'staff-dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">Dashboard</a>
+                        <a class="{% if request.resolver_match.url_name == 'booking-list' or request.resolver_match.url_name == 'booking-add' or request.resolver_match.url_name == 'booking-detail' %}active{% endif %}" href="{% url 'booking-list' %}">Bookings</a>
+                        <a class="{% if request.resolver_match.url_name == 'item-list' or request.resolver_match.url_name == 'item-add' or request.resolver_match.url_name == 'item-edit' %}active{% endif %}" href="{% url 'item-list' %}">Rental Items</a>
+                        <a class="{% if request.resolver_match.url_name == 'inventory' %}active{% endif %}" href="{% url 'inventory' %}">Inventory</a>
+                        <a class="{% if request.resolver_match.url_name == 'inventory-alerts' %}active{% endif %}" href="{% url 'inventory-alerts' %}">
+                            <span class="sidebar-link-label">Inventory Alerts</span>
+                            {% if unread_inventory_alert_count %}
+                                <span class="nav-badge">{{ unread_inventory_alert_count }}</span>
+                            {% endif %}
+                        </a>
+                        <a class="{% if request.resolver_match.url_name == 'return-tracker' %}active{% endif %}" href="{% url 'return-tracker' %}">Returns</a>
+                        <a class="{% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" href="{% url 'notifications' %}">
+                            <span class="sidebar-link-label">Notifications</span>
+                            {% if unread_notification_count %}
+                                <span class="nav-badge">{{ unread_notification_count }}</span>
+                            {% endif %}
+                        </a>
+                        <a class="{% if request.resolver_match.url_name == 'payment-list' or request.resolver_match.url_name == 'payment-add' %}active{% endif %}" href="{% url 'payment-list' %}">Payments</a>
+                        <a class="{% if request.resolver_match.url_name == 'reports' %}active{% endif %}" href="{% url 'reports' %}">Reports</a>
+                        <a class="{% if request.resolver_match.url_name == 'settings' %}active{% endif %}" href="{% url 'settings' %}">Settings</a>
+                    </nav>
+                </div>
+            </aside>
+
+            <div class="main-panel">
+                <header class="topbar">
+                    <div class="topbar-copy">
+                        <p class="eyebrow">Internal staff system</p>
+                        <h2>{% block page_heading %}WINBIRD Dashboard{% endblock %}</h2>
+                        <p class="topbar-copyline">{% block page_intro %}Manage bookings, inventory, payments, and fulfilment from one shared workspace.{% endblock %}</p>
+                    </div>
+                    <div class="topbar-actions">
+                        <div class="user-chip {% if request.user.can_manage_catalog %}admin{% else %}staff{% endif %}">
+                            <p class="user-chip-kicker">{% if request.user.can_manage_catalog %}Admin workspace{% else %}Staff workspace{% endif %}</p>
+                            <span>{{ request.user.get_full_name|default:request.user.username }}</span>
+                            <small>{{ request.user.role|title }}</small>
+                        </div>
+                        <form method="post" action="{% url 'logout' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="secondary-btn subtle-btn">Sign out</button>
+                        </form>
+                    </div>
+                </header>
+
+                {% if messages %}
+                    <section class="message-stack">
+                        {% for message in messages %}
+                            <div class="message {{ message.tags }}">{{ message }}</div>
+                        {% endfor %}
+                    </section>
+                {% endif %}
+
+                <main class="page-content">
+    {% else %}
+        <main class="auth-shell">
+            {% if messages %}
+                <section class="message-stack">
+                    {% for message in messages %}
+                        <div class="message {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </section>
+            {% endif %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+
+    {% if request.user.is_authenticated %}
+                </main>
+            </div>
+        </div>
+    {% else %}
+        </main>
+    {% endif %}
+
+    <script src="{% static 'rentals/js/app.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

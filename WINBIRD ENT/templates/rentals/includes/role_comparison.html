@@ -1,0 +1,41 @@
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Role Comparison</p>
+            <h3>Staff vs Admin access</h3>
+        </div>
+    </div>
+    <div class="content-grid two-column role-grid">
+        <article class="role-card {% if request.user.role == 'ADMIN' %}active{% endif %}">
+            <div class="role-card-head">
+                <strong>Admin</strong>
+                {% if request.user.role == 'ADMIN' %}
+                    <span class="role-badge">Current role</span>
+                {% endif %}
+            </div>
+            <p class="role-copy">Admins oversee approvals, stock control, reports, and broader system management.</p>
+            <ul class="role-list">
+                <li>Can confirm and cancel bookings</li>
+                <li>Can add and edit rental items, prices, and inventory</li>
+                <li>Can create staff accounts and manage reports</li>
+                <li>Can monitor staff activity and payment follow-up</li>
+            </ul>
+        </article>
+
+        <article class="role-card {% if request.user.role == 'STAFF' %}active{% endif %}">
+            <div class="role-card-head">
+                <strong>Staff</strong>
+                {% if request.user.role == 'STAFF' %}
+                    <span class="role-badge">Current role</span>
+                {% endif %}
+            </div>
+            <p class="role-copy">Staff focus on booking entry, customer handling, payments, dispatch, and returns.</p>
+            <ul class="role-list">
+                <li>Can create bookings and record payments</li>
+                <li>Can view inventory, bookings, and alerts</li>
+                <li>Can mark items out and returned during fulfilment</li>
+                <li>Cannot approve bookings or manage catalog setup</li>
+            </ul>
+        </article>
+    </div>
+</section>

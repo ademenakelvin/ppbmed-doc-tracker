@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}{{ customer.name }} | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Customer History{% endblock %}
+{% block page_intro %}See the customer contact, key booking totals, and the most important booking update at a glance.{% endblock %}
+
+{% block content %}
+<section class="content-grid two-column">
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Customer</p>
+                <h3>{{ customer.name }}</h3>
+            </div>
+        </div>
+        <div class="detail-grid">
+            <div><span>Phone</span><strong>{{ customer.phone }}</strong></div>
+            <div><span>Total bookings</span><strong>{{ total_bookings }}</strong></div>
+            <div><span>Recorded spend</span><strong>GHS {{ total_spend|floatformat:2 }}</strong></div>
+            <div><span>Balance due</span><strong>GHS {{ outstanding_balance|floatformat:2 }}</strong></div>
+        </div>
+        <div class="note-box">
+            <span>Customer note</span>
+            <p>
+                {% if active_bookings_count %}
+                    {{ active_bookings_count }} active booking{{ active_bookings_count|pluralize }} currently need follow-up.
+                {% else %}
+                    No active bookings right now.
+                {% endif %}
+                Customer on file since {{ customer.created_at|date:"M j, Y" }}.
+            </p>
+        </div>
+    </article>
+
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Booking summary</p>
+                <h3>{{ spotlight_title }}</h3>
+            </div>
+        </div>
+        {% if spotlight_booking %}
+            <div class="detail-grid">
+                <div><span>Booking</span><strong>#{{ spotlight_booking.pk }}</strong></div>
+                <div><span>Event date</span><strong>{{ spotlight_booking.event_date }}</strong></div>
+                <div><span>Return due</span><strong>{{ spotlight_booking.return_due_date }}</strong></div>
+                <div><span>Payment</span><strong>{{ spotlight_booking.get_payment_status_display }}</strong></div>
+            </div>
+            <div class="note-box">
+                <span>Status</span>
+                <div class="tag-group">
+                    <span class="status-pill" data-status="{{ spotlight_booking.status }}">{{ spotlight_booking.get_status_display }}</span>
+                    <span class="status-pill" data-status="{{ spotlight_booking.payment_status }}">{{ spotlight_booking.get_payment_status_display }}</span>
+                </div>
+            </div>
+            <div class="row-actions">
+                <a class="secondary-btn" href="{% url 'booking-detail' spotlight_booking.pk %}">Open booking</a>
+            </div>
+        {% else %}
+            <div class="note-box">
+                <span>Booking summary</span>
+                <p>No bookings have been recorded for this customer yet.</p>
+            </div>
+        {% endif %}
+    </article>
+</section>
+
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Booking history</p>
+            <h3>All customer bookings</h3>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking</th>
+                    <th>Event Date</th>
+                    <th>Return Due</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                    <tr>
+                        <td>#{{ booking.pk }}</td>
+                        <td>{{ booking.event_date }}</td>
+                        <td>{{ booking.return_due_date }}</td>
+                        <td>GHS {{ booking.total_amount|floatformat:2 }}</td>
+                        <td><span class="status-pill" data-status="{{ booking.payment_status }}">{{ booking.get_payment_status_display }}</span></td>
+                        <td><span class="status-pill" data-status="{{ booking.status }}">{{ booking.get_status_display }}</span></td>
+                        <td><a href="{% url 'booking-detail' booking.pk %}">Open</a></td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="7">No bookings recorded for this customer yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

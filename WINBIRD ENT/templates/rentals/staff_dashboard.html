@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Staff Dashboard | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}{{ dashboard_title }}{% endblock %}
+{% block page_intro %}Keep today's bookings, returns, and payment follow-up visible while you work through daily operations.{% endblock %}
+
+{% block content %}
+<section class="hero-banner">
+    <div>
+        <p class="eyebrow">{{ dashboard_kicker }}</p>
+        <h3>Stay on top of today's bookings, returns, and customer follow-up.</h3>
+        <p class="hero-copy">This dashboard keeps the daily workflow front and center for staff handling bookings, payments, and item returns.</p>
+    </div>
+    <div class="chip-row">
+        <a class="primary-btn" href="{% url 'booking-add' %}">Create booking</a>
+        <a class="secondary-btn" href="{% url 'booking-list' %}">All bookings</a>
+        <a class="secondary-btn" href="{% url 'payment-list' %}">Payments</a>
+    </div>
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card">
+        <p>My Bookings</p>
+        <strong>{{ my_bookings_count }}</strong>
+        <span>Bookings you have created in the system.</span>
+    </article>
+    <article class="stat-card">
+        <p>Today's Jobs</p>
+        <strong>{{ today_jobs_count }}</strong>
+        <span>Bookings scheduled for {{ today }}.</span>
+    </article>
+    <article class="stat-card">
+        <p>Returns Due</p>
+        <strong>{{ returns_due_today|length }}</strong>
+        <span>Confirmed jobs that need return attention.</span>
+    </article>
+    <article class="stat-card">
+        <p>Payments Recorded</p>
+        <strong>{{ my_payments_count }}</strong>
+        <span>Manual payments recorded under your account.</span>
+    </article>
+</section>
+
+<section class="content-grid two-column">
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Today's queue</p>
+                <h3>Bookings scheduled today</h3>
+            </div>
+            <a class="secondary-btn" href="{% url 'booking-list' %}?view=today&display=calendar">Open schedule</a>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking</th>
+                        <th>Customer</th>
+                        <th>Status</th>
+                        <th>Payment</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in today_jobs %}
+                        <tr>
+                            <td>#{{ booking.pk }}</td>
+                            <td>{{ booking.customer.name }}</td>
+                            <td><span class="status-pill" data-status="{{ booking.status }}">{{ booking.get_status_display }}</span></td>
+                            <td><span class="status-pill" data-status="{{ booking.payment_status }}">{{ booking.get_payment_status_display }}</span></td>
+                            <td>
+                                <div class="chip-row">
+                                    {% if booking.status == "PENDING" and request.user.can_confirm_bookings %}
+                                        <form method="post" action="{% url 'booking-action' booking.pk 'confirm' %}">
+                                            {% csrf_token %}
+                                            <button class="secondary-btn" type="submit">Confirm</button>
+                                        </form>
+                                    {% endif %}
+                                    {% if booking.status != "CANCELLED" and booking.payment_status != "PAID" %}
+                                        <a href="{% url 'payment-add' booking.pk %}">Record payment</a>
+                                    {% endif %}
+                                    <a href="{% url 'booking-detail' booking.pk %}">Open</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5">No jobs are scheduled for today.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">My recent work</p>
+                <h3>Bookings I created</h3>
+            </div>
+            <a class="secondary-btn" href="{% url 'booking-list' %}?view=mine">Open bookings</a>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Booking</th>
+                        <th>Customer</th>
+                        <th>Event Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in my_recent_bookings %}
+                        <tr>
+                            <td>#{{ booking.pk }}</td>
+                            <td>{{ booking.customer.name }}</td>
+                            <td>{{ booking.event_date }}</td>
+                            <td><span class="status-pill" data-status="{{ booking.status }}">{{ booking.get_status_display }}</span></td>
+                            <td>
+                                <div class="chip-row">
+                                    {% if booking.status == "PENDING" and request.user.can_confirm_bookings %}
+                                        <form method="post" action="{% url 'booking-action' booking.pk 'confirm' %}">
+                                            {% csrf_token %}
+                                            <button class="secondary-btn" type="submit">Confirm</button>
+                                        </form>
+                                    {% endif %}
+                                    {% if booking.status == "CONFIRMED" and booking.dispatched_at %}
+                                        <form method="post" action="{% url 'booking-action' booking.pk 'mark_returned' %}">
+                                            {% csrf_token %}
+                                            <button class="secondary-btn" type="submit">Mark returned</button>
+                                        </form>
+                                    {% endif %}
+                                    <a href="{% url 'booking-detail' booking.pk %}">Open</a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="5">You have not created any bookings yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Recent team activity</p>
+            <h3>Latest updates</h3>
+        </div>
+    </div>
+    <div class="stack-list">
+        {% for entry in recent_activity %}
+            <div class="stack-item">
+                <strong>{{ entry.action }}</strong>
+                <small>{% if entry.user %}{{ entry.user }}{% else %}System{% endif %} | {{ entry.created_at|date:"M j, Y H:i" }}</small>
+            </div>
+        {% empty %}
+            <p class="muted-copy">No activity logged yet.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

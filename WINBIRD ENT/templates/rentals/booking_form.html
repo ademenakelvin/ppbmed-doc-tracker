@@ -1,0 +1,155 @@
+{% extends "base.html" %}
+
+{% block title %}Create Booking | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Create Booking{% endblock %}
+{% block page_intro %}Capture customer requests quickly with daily pricing and availability rules built into the workflow.{% endblock %}
+
+{% block content %}
+<form method="post" class="stacked-form">
+    {% csrf_token %}
+    {% if form.non_field_errors %}
+        <div class="form-errors">{{ form.non_field_errors }}</div>
+    {% endif %}
+
+    <section class="content-grid two-column">
+        <article class="panel-card">
+            <div class="panel-head">
+                <div>
+                    <p class="eyebrow">Customer request</p>
+                    <h3>Customer details</h3>
+                </div>
+            </div>
+            <div class="field-grid">
+                <div class="field-group">
+                    <label for="{{ form.customer_name.id_for_label }}">Customer name</label>
+                    {{ form.customer_name }}
+                    {% if form.customer_name.errors %}<div class="field-error">{{ form.customer_name.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="field-group">
+                    <label for="{{ form.customer_phone.id_for_label }}">Phone number</label>
+                    {{ form.customer_phone }}
+                    {% if form.customer_phone.errors %}<div class="field-error">{{ form.customer_phone.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+        </article>
+
+        <article class="panel-card">
+            <div class="panel-head">
+                <div>
+                    <p class="eyebrow">Rental schedule</p>
+                    <h3>Dates and notes</h3>
+                </div>
+            </div>
+            <div class="field-grid">
+                <div class="field-group">
+                    <label for="{{ form.event_date.id_for_label }}">Event date</label>
+                    {{ form.event_date }}
+                    {% if form.event_date.errors %}<div class="field-error">{{ form.event_date.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="field-group">
+                    <label for="{{ form.return_due_date.id_for_label }}">Return due date</label>
+                    {{ form.return_due_date }}
+                    {% if form.return_due_date.errors %}<div class="field-error">{{ form.return_due_date.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="field-group full-span">
+                    <label for="{{ form.notes.id_for_label }}">Notes</label>
+                    {{ form.notes }}
+                    {% if form.notes.errors %}<div class="field-error">{{ form.notes.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+            <p class="muted-copy">Daily prices are multiplied by the number of rental days. Example: 2 days charges 2x the selected daily rate.</p>
+        </article>
+    </section>
+
+    <section class="panel-card availability-panel" data-availability-checker data-url="{% url 'booking-availability' %}">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Availability checker</p>
+                <h3>Check free items before saving</h3>
+                <p class="muted-copy muted-copy-dark">Use the selected dates to see what is still available across the catalog.</p>
+            </div>
+            <button type="button" class="secondary-btn" data-check-availability>Check availability</button>
+        </div>
+        <div class="availability-feedback muted-copy-dark" data-availability-feedback>
+            Choose the event date and return due date, then run the availability check.
+        </div>
+        <div class="availability-results" data-availability-results></div>
+    </section>
+
+    <section class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Booking items</p>
+                <h3>Select items, prices, and quantities</h3>
+                <p class="muted-copy muted-copy-dark">Each saved line total uses daily price x quantity x rental days.</p>
+            </div>
+            <button type="button" class="secondary-btn" data-add-form>Add item row</button>
+        </div>
+
+        {% if item_formset.non_form_errors %}
+            <div class="form-errors">{{ item_formset.non_form_errors }}</div>
+        {% endif %}
+
+        <div class="formset-block" data-formset data-prefix="{{ item_formset.prefix }}">
+            {{ item_formset.management_form }}
+            <div data-formset-forms>
+                {% for item_form in item_formset %}
+                    <div class="formset-row">
+                        {% for hidden in item_form.hidden_fields %}{{ hidden }}{% endfor %}
+                        <div class="field-grid three-up">
+                            <div class="field-group">
+                                <label for="{{ item_form.rental_item.id_for_label }}">Item</label>
+                                {{ item_form.rental_item }}
+                                {% if item_form.rental_item.errors %}<div class="field-error">{{ item_form.rental_item.errors|join:", " }}</div>{% endif %}
+                            </div>
+                            <div class="field-group">
+                                <label for="{{ item_form.price_option.id_for_label }}">Price option</label>
+                                {{ item_form.price_option }}
+                                {% if item_form.price_option.errors %}<div class="field-error">{{ item_form.price_option.errors|join:", " }}</div>{% endif %}
+                            </div>
+                            <div class="field-group">
+                                <label for="{{ item_form.quantity.id_for_label }}">Quantity</label>
+                                {{ item_form.quantity }}
+                                {% if item_form.quantity.errors %}<div class="field-error">{{ item_form.quantity.errors|join:", " }}</div>{% endif %}
+                            </div>
+                        </div>
+                        <div class="row-actions">
+                            <div class="visually-hidden">{{ item_form.DELETE }}</div>
+                            <button type="button" class="text-btn" data-remove-form>Remove row</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <template data-empty-form>
+                <div class="formset-row">
+                    {% for hidden in item_formset.empty_form.hidden_fields %}{{ hidden }}{% endfor %}
+                    <div class="field-grid three-up">
+                        <div class="field-group">
+                            <label for="{{ item_formset.empty_form.rental_item.id_for_label }}">Item</label>
+                            {{ item_formset.empty_form.rental_item }}
+                        </div>
+                        <div class="field-group">
+                            <label for="{{ item_formset.empty_form.price_option.id_for_label }}">Price option</label>
+                            {{ item_formset.empty_form.price_option }}
+                        </div>
+                        <div class="field-group">
+                            <label for="{{ item_formset.empty_form.quantity.id_for_label }}">Quantity</label>
+                            {{ item_formset.empty_form.quantity }}
+                        </div>
+                    </div>
+                    <div class="row-actions">
+                        <div class="visually-hidden">{{ item_formset.empty_form.DELETE }}</div>
+                        <button type="button" class="text-btn" data-remove-form>Remove row</button>
+                    </div>
+                </div>
+            </template>
+        </div>
+    </section>
+
+    <div class="page-actions">
+        <button type="submit" class="primary-btn">Save pending booking</button>
+        <a class="secondary-btn" href="{% url 'booking-list' %}">Back to bookings</a>
+    </div>
+</form>
+{% endblock %}

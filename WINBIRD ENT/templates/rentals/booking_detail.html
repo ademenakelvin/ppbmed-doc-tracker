@@ -1,0 +1,222 @@
+{% extends "base.html" %}
+
+{% block title %}Booking #{{ booking.pk }} | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Booking #{{ booking.pk }}{% endblock %}
+{% block page_intro %}Review the full fulfilment record for this booking, including items, balance, and operational actions.{% endblock %}
+
+{% block content %}
+<section class="content-grid two-column">
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Customer</p>
+                <h3><a href="{% url 'customer-detail' booking.customer.pk %}">{{ booking.customer.name }}</a></h3>
+            </div>
+            <div class="tag-group">
+                <span class="status-pill" data-status="{{ booking.status }}">{{ booking.get_status_display }}</span>
+                <span class="status-pill" data-status="{{ booking.payment_status }}">{{ booking.get_payment_status_display }}</span>
+            </div>
+        </div>
+        <div class="detail-grid">
+            <div><span>Phone</span><strong>{{ booking.customer.phone }}</strong></div>
+            <div><span>Event date</span><strong>{{ booking.event_date }}</strong></div>
+            <div><span>Return due</span><strong>{{ booking.return_due_date }}</strong></div>
+            <div><span>Created by</span><strong>{{ booking.created_by }}</strong></div>
+            <div><span>Confirmed by</span><strong>{{ booking.approved_by|default:"Not confirmed yet" }}</strong></div>
+            <div><span>Created</span><strong>{{ booking.created_at|date:"M j, Y H:i" }}</strong></div>
+        </div>
+        {% if booking.notes %}
+            <div class="note-box">
+                <span>Notes</span>
+                <p>{{ booking.notes }}</p>
+            </div>
+        {% endif %}
+    </article>
+
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Financials</p>
+                <h3>Payment summary</h3>
+            </div>
+            <div class="chip-row">
+                <a class="secondary-btn" href="{% url 'booking-receipt' booking.pk %}">Print receipt</a>
+                {% if booking.status != "CANCELLED" %}
+                    <a class="secondary-btn" href="{% url 'payment-add' booking.pk %}">Record payment</a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="detail-grid">
+            <div><span>Total amount</span><strong>GHS {{ booking.total_amount|floatformat:2 }}</strong></div>
+            <div><span>Paid so far</span><strong>GHS {{ booking.amount_paid|floatformat:2 }}</strong></div>
+            <div><span>Balance due</span><strong>GHS {{ booking.balance_due|floatformat:2 }}</strong></div>
+            <div><span>Rental days</span><strong>{{ booking.rental_days }}</strong></div>
+            <div><span>Dispatched</span><strong>{{ booking.dispatched_at|default:"Not yet" }}</strong></div>
+            <div><span>Returned</span><strong>{{ booking.returned_at|default:"Not yet" }}</strong></div>
+            <div><span>Completed</span><strong>{{ booking.completed_at|default:"Not yet" }}</strong></div>
+        </div>
+        <div class="note-box">
+            <span>Pricing rule</span>
+            <p>Daily rates are multiplied by quantity and {{ booking.rental_days }} rental day{{ booking.rental_days|pluralize }}.</p>
+        </div>
+    </article>
+</section>
+
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Workflow actions</p>
+            <h3>Move this booking forward</h3>
+        </div>
+        <div class="action-row">
+            {% if booking.status == "PENDING" and request.user.can_confirm_bookings %}
+                <form method="post" action="{% url 'booking-action' booking.pk 'confirm' %}">
+                    {% csrf_token %}
+                    <button class="primary-btn" type="submit">Confirm booking</button>
+                </form>
+            {% endif %}
+
+            {% if booking.status == "CONFIRMED" and not booking.dispatched_at %}
+                <form method="post" action="{% url 'booking-action' booking.pk 'mark_out' %}">
+                    {% csrf_token %}
+                    <button class="primary-btn" type="submit">Mark items out</button>
+                </form>
+            {% endif %}
+
+            {% if booking.status == "CONFIRMED" and booking.dispatched_at %}
+                <form method="post" action="{% url 'booking-action' booking.pk 'mark_returned' %}">
+                    {% csrf_token %}
+                    <button class="primary-btn" type="submit">Mark items returned</button>
+                </form>
+            {% endif %}
+
+            {% if booking.status == "RETURNED" %}
+                <form method="post" action="{% url 'booking-action' booking.pk 'complete' %}">
+                    {% csrf_token %}
+                    <button class="primary-btn" type="submit">Complete booking</button>
+                </form>
+            {% endif %}
+
+            {% if request.user.can_cancel_bookings and booking.status != "COMPLETED" and booking.status != "CANCELLED" %}
+                <form method="post" action="{% url 'booking-action' booking.pk 'cancel' %}">
+                    {% csrf_token %}
+                    <button class="danger-btn" type="submit">Cancel booking</button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+<section class="content-grid two-column">
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Items</p>
+                <h3>Booked rental lines</h3>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Item</th>
+                        <th>Price Option</th>
+                        <th>Qty</th>
+                        <th>Daily Rate</th>
+                        <th>Days</th>
+                        <th>Line Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in booking.items.all %}
+                        <tr>
+                            <td>{{ item.rental_item.name }}</td>
+                            <td>{{ item.price_option.label }}</td>
+                            <td>{{ item.quantity }}</td>
+                            <td>GHS {{ item.unit_price|floatformat:2 }}</td>
+                            <td>{{ item.rental_days }}</td>
+                            <td>GHS {{ item.line_total|floatformat:2 }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Payments</p>
+                <h3>Recorded transactions</h3>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Recorded by</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for payment in booking.payments.all %}
+                        <tr>
+                            <td>{{ payment.paid_on }}</td>
+                            <td>GHS {{ payment.amount|floatformat:2 }}</td>
+                            <td>{{ payment.recorded_by }}</td>
+                            <td><a href="{% url 'payment-receipt' payment.pk %}">Receipt</a></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="4">No payments recorded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </article>
+</section>
+
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Timeline</p>
+            <h3>Booking progress</h3>
+        </div>
+    </div>
+    <div class="timeline-list">
+        {% for item in timeline_entries %}
+            <div class="timeline-item {% if item.complete %}complete{% endif %}">
+                <div class="timeline-marker"></div>
+                <div>
+                    <strong>{{ item.title }}</strong>
+                    <small>{% if item.timestamp %}{{ item.timestamp|date:"M j, Y H:i" }}{% else %}Pending{% endif %}</small>
+                    <p>{{ item.detail }}</p>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</section>
+
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">History</p>
+            <h3>Activity log</h3>
+        </div>
+    </div>
+    <div class="stack-list">
+        {% for entry in booking.activity_logs.all %}
+            <div class="stack-item">
+                <strong>{{ entry.action }}</strong>
+                <small>
+                    {% if entry.user %}{{ entry.user }}{% else %}System{% endif %}
+                    | {{ entry.created_at|date:"M j, Y H:i" }}
+                </small>
+            </div>
+        {% empty %}
+            <p class="muted-copy">No activity logged yet.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

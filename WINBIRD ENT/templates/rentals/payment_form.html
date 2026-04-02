@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Record Payment | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Record Payment{% endblock %}
+{% block page_intro %}Capture a manual payment entry and update the booking balance immediately for the operations team.{% endblock %}
+
+{% block content %}
+<section class="content-grid two-column">
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Booking</p>
+                <h3>#{{ booking.pk }} for {{ booking.customer.name }}</h3>
+            </div>
+        </div>
+        <div class="detail-grid">
+            <div><span>Total amount</span><strong>GHS {{ booking.total_amount|floatformat:2 }}</strong></div>
+            <div><span>Already paid</span><strong>GHS {{ booking.amount_paid|floatformat:2 }}</strong></div>
+            <div><span>Balance due</span><strong>GHS {{ booking.balance_due|floatformat:2 }}</strong></div>
+            <div><span>Rental days</span><strong>{{ booking.rental_days }}</strong></div>
+            <div><span>Status</span><strong>{{ booking.get_payment_status_display }}</strong></div>
+        </div>
+    </article>
+
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Manual entry</p>
+                <h3>Capture payment details</h3>
+            </div>
+        </div>
+        <form method="post" class="stacked-form">
+            {% csrf_token %}
+            {% if form.non_field_errors %}
+                <div class="form-errors">{{ form.non_field_errors }}</div>
+            {% endif %}
+            <div class="field-group">
+                <label for="{{ form.amount.id_for_label }}">Amount</label>
+                {{ form.amount }}
+                {% if form.amount.errors %}<div class="field-error">{{ form.amount.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group">
+                <label for="{{ form.paid_on.id_for_label }}">Paid on</label>
+                {{ form.paid_on }}
+                {% if form.paid_on.errors %}<div class="field-error">{{ form.paid_on.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="field-group">
+                <label for="{{ form.notes.id_for_label }}">Notes</label>
+                {{ form.notes }}
+                {% if form.notes.errors %}<div class="field-error">{{ form.notes.errors|join:", " }}</div>{% endif %}
+            </div>
+            <div class="page-actions">
+                <button type="submit" class="primary-btn">Save payment</button>
+                <a class="secondary-btn" href="{% url 'booking-detail' booking.pk %}">Back to booking</a>
+            </div>
+        </form>
+    </article>
+</section>
+{% endblock %}

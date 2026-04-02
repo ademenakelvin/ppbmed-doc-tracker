@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Notifications{% endblock %}
+{% block page_intro %}Track workflow, payment, return, and booking updates from one place. Inventory warnings now live on their own page.{% endblock %}
+
+{% block content %}
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Notification feed</p>
+            <h3>Latest alerts</h3>
+            <p class="muted-copy muted-copy-dark">Filter the feed, open the linked booking, mark alerts as read, or clear old read items.</p>
+        </div>
+        <div class="chip-row">
+            {% if unread_notification_count %}
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="secondary-btn">Mark all as read</button>
+                </form>
+            {% endif %}
+            <form method="post" action="{% url 'notification-bulk-action' 'delete-read' %}">
+                {% csrf_token %}
+                <input type="hidden" name="scope" value="general">
+                <button type="submit" class="secondary-btn">Delete read alerts</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="chip-row">
+        <a class="filter-chip {% if selected_state == 'all' %}active{% endif %}" href="{% url 'notifications' %}{% if selected_kind != 'all' %}?kind={{ selected_kind }}{% endif %}">All</a>
+        <a class="filter-chip {% if selected_state == 'unread' %}active{% endif %}" href="{% url 'notifications' %}?state=unread{% if selected_kind != 'all' %}&kind={{ selected_kind }}{% endif %}">Unread</a>
+        <a class="filter-chip {% if selected_state == 'read' %}active{% endif %}" href="{% url 'notifications' %}?state=read{% if selected_kind != 'all' %}&kind={{ selected_kind }}{% endif %}">Read</a>
+    </div>
+
+    <div class="chip-row">
+        <a class="filter-chip {% if selected_kind == 'all' %}active{% endif %}" href="{% url 'notifications' %}{% if selected_state != 'all' %}?state={{ selected_state }}{% endif %}">All types</a>
+        {% for kind_key, kind_label in notification_kind_labels.items %}
+            <a class="filter-chip {% if selected_kind == kind_key %}active{% endif %}" href="{% url 'notifications' %}?kind={{ kind_key }}{% if selected_state != 'all' %}&state={{ selected_state }}{% endif %}">{{ kind_label }}</a>
+        {% endfor %}
+    </div>
+
+    <div class="stack-list">
+        {% for group in grouped_notifications %}
+            <div class="notification-group">
+                <div class="panel-head compact">
+                    <div>
+                        <p class="eyebrow">{{ group.label }}</p>
+                        <h3>{{ group.items|length }} alert{{ group.items|length|pluralize }}</h3>
+                    </div>
+                </div>
+                <div class="stack-list">
+                    {% for note in group.items %}
+                        <article class="stack-item notification-item {% if not note.is_read %}unread{% endif %}">
+                            <a class="notification-main-link" href="{% url 'notification-open' note.pk %}">
+                                <div class="notification-row">
+                                    <strong>{{ note.title }}</strong>
+                                    {% if not note.is_read %}
+                                        <span class="nav-badge inline">New</span>
+                                    {% endif %}
+                                </div>
+                                <p>{{ note.message }}</p>
+                                <small>{{ note.created_at|date:"M j, Y H:i" }}</small>
+                                <small>
+                                    {% if note.booking %}
+                                        Open booking #{{ note.booking.pk }}
+                                    {% else %}
+                                        View alert
+                                    {% endif %}
+                                </small>
+                            </a>
+                            <div class="notification-actions">
+                                {% if not note.is_read %}
+                                    <form method="post" action="{% url 'notification-action' note.pk 'read' %}">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="next" value="{% url 'notifications' %}">
+                                        <button type="submit" class="secondary-btn">Mark read</button>
+                                    </form>
+                                {% endif %}
+                                <form method="post" action="{% url 'notification-action' note.pk 'delete' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="next" value="{% url 'notifications' %}">
+                                    <button type="submit" class="danger-btn">Delete</button>
+                                </form>
+                            </div>
+                        </article>
+                    {% endfor %}
+                </div>
+            </div>
+        {% empty %}
+            <p class="muted-copy muted-copy-dark">No notifications yet.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

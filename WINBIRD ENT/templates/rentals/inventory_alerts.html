@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory Alerts | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Inventory Alerts{% endblock %}
+{% block page_intro %}Review low-stock and stockout warnings separately from the rest of the operations notifications.{% endblock %}
+
+{% block content %}
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Inventory alert feed</p>
+            <h3>Stock warnings</h3>
+            <p class="muted-copy muted-copy-dark">Use this page to focus only on inventory pressure, low-stock warnings, and stockout alerts.</p>
+        </div>
+        <div class="chip-row">
+            {% if unread_inventory_alert_count %}
+                <form method="post">
+                    {% csrf_token %}
+                    <button type="submit" class="secondary-btn">Mark all as read</button>
+                </form>
+            {% endif %}
+            <form method="post" action="{% url 'notification-bulk-action' 'delete-read' %}">
+                {% csrf_token %}
+                <input type="hidden" name="scope" value="inventory">
+                <button type="submit" class="secondary-btn">Delete read alerts</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="chip-row">
+        <a class="filter-chip {% if selected_state == 'all' %}active{% endif %}" href="{% url 'inventory-alerts' %}">All</a>
+        <a class="filter-chip {% if selected_state == 'unread' %}active{% endif %}" href="{% url 'inventory-alerts' %}?state=unread">Unread</a>
+        <a class="filter-chip {% if selected_state == 'read' %}active{% endif %}" href="{% url 'inventory-alerts' %}?state=read">Read</a>
+    </div>
+
+    <div class="stack-list">
+        {% for note in inventory_alerts %}
+            <article class="stack-item notification-item {% if not note.is_read %}unread{% endif %}">
+                <a class="notification-main-link" href="{% url 'notification-open' note.pk %}">
+                    <div class="notification-row">
+                        <strong>{{ note.title }}</strong>
+                        {% if not note.is_read %}
+                            <span class="nav-badge inline">New</span>
+                        {% endif %}
+                    </div>
+                    <p>{{ note.message }}</p>
+                    <small>{{ note.created_at|date:"M j, Y H:i" }}</small>
+                    <small>
+                        {% if note.booking %}
+                            Open booking #{{ note.booking.pk }}
+                        {% else %}
+                            View inventory alert
+                        {% endif %}
+                    </small>
+                </a>
+                <div class="notification-actions">
+                    {% if not note.is_read %}
+                        <form method="post" action="{% url 'notification-action' note.pk 'read' %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="next" value="{% url 'inventory-alerts' %}">
+                            <button type="submit" class="secondary-btn">Mark read</button>
+                        </form>
+                    {% endif %}
+                    <form method="post" action="{% url 'notification-action' note.pk 'delete' %}">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{% url 'inventory-alerts' %}">
+                        <button type="submit" class="danger-btn">Delete</button>
+                    </form>
+                </div>
+            </article>
+        {% empty %}
+            <p class="muted-copy muted-copy-dark">No inventory alerts right now.</p>
+        {% endfor %}
+    </div>
+</section>
+{% endblock %}

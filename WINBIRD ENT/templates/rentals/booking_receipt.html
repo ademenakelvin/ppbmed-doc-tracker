@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Booking Receipt #{{ booking.pk }}</title>
+    <style>
+        :root {
+            --ink: #17322d;
+            --muted: #63736e;
+            --line: #d6dfdb;
+            --paper: #ffffff;
+            --page: #edf3f0;
+            --accent: #1f6b5b;
+        }
+
+        @page {
+            size: A4;
+            margin: 12mm;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            padding: 18px;
+            color: var(--ink);
+            font-family: Arial, sans-serif;
+            background: var(--page);
+        }
+
+        h1, h2, h3, p {
+            margin: 0;
+        }
+
+        .sheet {
+            width: min(210mm, 100%);
+            margin: 0 auto;
+            background: var(--paper);
+            border: 1px solid var(--line);
+            box-shadow: 0 18px 40px rgba(23, 50, 45, 0.08);
+        }
+
+        .body {
+            padding: 18mm 16mm 14mm;
+        }
+
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 18px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--ink);
+            margin-bottom: 14px;
+        }
+
+        .brand-name {
+            font-size: 1.15rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .receipt-title {
+            margin-top: 6px;
+            font-size: 1.9rem;
+            line-height: 1.05;
+        }
+
+        .receipt-subtitle {
+            margin-top: 4px;
+            color: var(--muted);
+        }
+
+        .receipt-meta {
+            min-width: 220px;
+            display: grid;
+            gap: 8px;
+            padding: 10px 12px;
+            border: 1px solid var(--line);
+            background: #f7faf8;
+        }
+
+        .label {
+            display: block;
+            font-size: 0.72rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 2px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .info-block {
+            border: 1px solid var(--line);
+            padding: 12px;
+            background: #fafcfb;
+        }
+
+        .info-block h2,
+        .items-section h2,
+        .totals-block h2,
+        .notes-block h2 {
+            font-size: 0.92rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px 12px;
+        }
+
+        .summary-row {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .summary-card {
+            border: 1px solid var(--line);
+            padding: 10px 12px;
+            background: #fff;
+        }
+
+        .summary-card strong {
+            display: block;
+            font-size: 1rem;
+            margin-top: 2px;
+        }
+
+        .items-section,
+        .totals-block,
+        .notes-block {
+            break-inside: avoid;
+        }
+
+        .items-wrap {
+            border: 1px solid var(--line);
+            margin-bottom: 12px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border-bottom: 1px solid var(--line);
+            padding: 8px 10px;
+            text-align: left;
+            vertical-align: top;
+            font-size: 0.95rem;
+        }
+
+        thead th {
+            background: #f3f7f5;
+            font-size: 0.74rem;
+            text-transform: uppercase;
+            letter-spacing: 0.07em;
+            color: var(--muted);
+        }
+
+        tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .num {
+            text-align: right;
+            white-space: nowrap;
+        }
+
+        .totals-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+            gap: 12px;
+            margin-top: 4px;
+        }
+
+        .totals-block,
+        .notes-block {
+            border: 1px solid var(--line);
+            padding: 12px;
+            background: #fafcfb;
+        }
+
+        .total-line {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .total-line:last-child {
+            border-bottom: none;
+        }
+
+        .total-line.balance {
+            padding-top: 10px;
+            font-weight: 700;
+            font-size: 1.02rem;
+            color: var(--accent);
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: 14px;
+        }
+
+        .print-btn {
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            padding: 0.75rem 1.15rem;
+            font: inherit;
+            cursor: pointer;
+        }
+
+        @media (max-width: 780px) {
+            .body {
+                padding: 16px;
+            }
+
+            .receipt-header,
+            .info-grid,
+            .detail-grid,
+            .summary-row,
+            .totals-grid {
+                grid-template-columns: 1fr;
+                display: grid;
+            }
+
+            .receipt-header {
+                display: grid;
+            }
+        }
+
+        @media print {
+            body {
+                padding: 0;
+                background: #fff;
+            }
+
+            .sheet {
+                width: 100%;
+                margin: 0;
+                border: none;
+                box-shadow: none;
+            }
+
+            .body {
+                padding: 0;
+            }
+
+            .actions {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="sheet">
+        <section class="body">
+            <header class="receipt-header">
+                <div>
+                    <div class="brand-name">WINBIRD Enterprise</div>
+                    <h1 class="receipt-title">Booking Receipt</h1>
+                    <p class="receipt-subtitle">Booking #{{ booking.pk }}</p>
+                </div>
+                <div class="receipt-meta">
+                    <div><span class="label">Issued</span><strong>{{ booking.created_at|date:"M j, Y H:i" }}</strong></div>
+                    <div><span class="label">Status</span><strong>{{ booking.get_status_display }}</strong></div>
+                </div>
+            </header>
+
+            <section class="summary-row">
+                <div class="summary-card"><span class="label">Customer</span><strong>{{ booking.customer.name }}</strong></div>
+                <div class="summary-card"><span class="label">Event date</span><strong>{{ booking.event_date|date:"M j, Y" }}</strong></div>
+                <div class="summary-card"><span class="label">Return due</span><strong>{{ booking.return_due_date|date:"M j, Y" }}</strong></div>
+                <div class="summary-card"><span class="label">Rental days</span><strong>{{ booking.rental_days }}</strong></div>
+            </section>
+
+            <section class="info-grid">
+                <article class="info-block">
+                    <h2>Customer</h2>
+                    <div class="detail-grid">
+                        <div><span class="label">Name</span><strong>{{ booking.customer.name }}</strong></div>
+                        <div><span class="label">Phone</span><strong>{{ booking.customer.phone }}</strong></div>
+                        <div><span class="label">Recorded by</span><strong>{{ booking.created_by }}</strong></div>
+                        <div><span class="label">Confirmed by</span><strong>{{ booking.approved_by|default:"Pending" }}</strong></div>
+                    </div>
+                </article>
+                <article class="info-block">
+                    <h2>Booking Details</h2>
+                    <div class="detail-grid">
+                        <div><span class="label">Payment status</span><strong>{{ booking.get_payment_status_display }}</strong></div>
+                        <div><span class="label">Items</span><strong>{{ booking.items.count }} line{{ booking.items.count|pluralize }}</strong></div>
+                        <div><span class="label">Event date</span><strong>{{ booking.event_date|date:"M j, Y" }}</strong></div>
+                        <div><span class="label">Return due</span><strong>{{ booking.return_due_date|date:"M j, Y" }}</strong></div>
+                    </div>
+                </article>
+            </section>
+
+            <section class="items-section">
+                <h2>Items</h2>
+                <div class="items-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Price Option</th>
+                            <th class="num">Qty</th>
+                            <th class="num">Daily Rate</th>
+                            <th class="num">Days</th>
+                            <th class="num">Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in booking.items.all %}
+                            <tr>
+                                <td class="item-name">{{ item.rental_item.name }}</td>
+                                <td>{{ item.price_option.label }}</td>
+                                <td class="num">{{ item.quantity }}</td>
+                                <td class="num">GHS {{ item.unit_price|floatformat:2 }}</td>
+                                <td class="num">{{ item.rental_days }}</td>
+                                <td class="num">GHS {{ item.line_total|floatformat:2 }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="6">No rental items were added to this booking.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </section>
+
+            <section class="totals-grid">
+                <article class="totals-block">
+                    <h2>Payment Summary</h2>
+                    <div class="total-line">
+                        <span>Total amount</span>
+                        <strong>GHS {{ booking.total_amount|floatformat:2 }}</strong>
+                    </div>
+                    <div class="total-line">
+                        <span>Paid so far</span>
+                        <strong>GHS {{ booking.amount_paid|floatformat:2 }}</strong>
+                    </div>
+                    <div class="total-line balance">
+                        <span>Balance due</span>
+                        <strong>GHS {{ booking.balance_due|floatformat:2 }}</strong>
+                    </div>
+                </article>
+                <article class="notes-block">
+                    <h2>Notes</h2>
+                    <p>{{ booking.notes|default:"No notes recorded for this booking." }}</p>
+                </article>
+            </section>
+
+            <div class="actions">
+                <button class="print-btn" onclick="window.print()">Print receipt</button>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

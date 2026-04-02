@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Rental Items | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Rental Item Management{% endblock %}
+{% block page_intro %}Manage the catalog, pricing options, and stock counts that power your booking workflow.{% endblock %}
+
+{% block content %}
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Catalog</p>
+            <h3>Rental items and pricing</h3>
+        </div>
+        {% if request.user.can_manage_catalog %}
+            <a class="primary-btn" href="{% url 'item-add' %}">Add item</a>
+        {% endif %}
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Category</th>
+                    <th>Price Options</th>
+                    <th>Total Stock</th>
+                    <th>Available Now</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td>{{ item.category.name }}</td>
+                        <td>
+                            <div class="tag-group">
+                                {% for price in item.price_options.all %}
+                                    <span class="tag">GHS {{ price.amount|floatformat:2 }} - {{ price.label }}</span>
+                                {% empty %}
+                                    <span class="muted-copy">No prices yet</span>
+                                {% endfor %}
+                            </div>
+                        </td>
+                        <td>{{ item.quantity_total }}</td>
+                        <td>{{ item.quantity_available }}</td>
+                        <td>
+                            {% if item.is_active %}
+                                <span class="status-pill" data-status="ACTIVE">Active</span>
+                            {% else %}
+                                <span class="status-pill" data-status="CANCELLED">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if request.user.can_manage_catalog %}
+                                <a href="{% url 'item-edit' item.pk %}">Edit</a>
+                            {% else %}
+                                <span class="muted-copy">View only</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="7">No items yet. Run the seed command or add items manually.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

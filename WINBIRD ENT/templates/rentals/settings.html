@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Settings | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Workspace Settings{% endblock %}
+{% block page_intro %}Manage staff access and review the key setup details for this internal workspace without the extra clutter.{% endblock %}
+
+{% block content %}
+<section class="stats-grid settings-stats-grid">
+    <article class="stat-card">
+        <p>Total Users</p>
+        <strong>{{ user_count }}</strong>
+        <span>All internal accounts currently registered in the workspace.</span>
+    </article>
+    <article class="stat-card">
+        <p>Staff Accounts</p>
+        <strong>{{ staff_account_count }}</strong>
+        <span>Accounts used for bookings, payments, dispatch, and returns.</span>
+    </article>
+    <article class="stat-card">
+        <p>Admin Accounts</p>
+        <strong>{{ admin_count }}</strong>
+        <span>Users with approvals, setup control, and oversight access.</span>
+    </article>
+    <article class="stat-card">
+        <p>Trusted Approvers</p>
+        <strong>{{ booking_approver_count }}</strong>
+        <span>Staff members allowed to confirm bookings without full admin access.</span>
+    </article>
+    <article class="stat-card">
+        <p>Categories</p>
+        <strong>{{ category_count }}</strong>
+        <span>Rental groups currently configured in the catalog.</span>
+    </article>
+</section>
+
+{% if request.user.can_manage_catalog %}
+<section class="content-grid two-column" id="staff-management">
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Team access</p>
+                <h3>Add staff account</h3>
+                <p class="settings-card-copy">Create internal staff logins here instead of using Django admin.</p>
+            </div>
+        </div>
+
+        <form method="post" class="stacked-form">
+            {% csrf_token %}
+            {% if staff_form.non_field_errors %}
+                <div class="form-errors">{{ staff_form.non_field_errors }}</div>
+            {% endif %}
+            <div class="field-grid">
+                <div class="field-group">
+                    <label for="{{ staff_form.username.id_for_label }}">Username</label>
+                    {{ staff_form.username }}
+                    {% if staff_form.username.errors %}<div class="field-error">{{ staff_form.username.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="field-group">
+                    <label for="{{ staff_form.email.id_for_label }}">Email</label>
+                    {{ staff_form.email }}
+                    {% if staff_form.email.errors %}<div class="field-error">{{ staff_form.email.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="field-group">
+                    <label for="{{ staff_form.first_name.id_for_label }}">First name</label>
+                    {{ staff_form.first_name }}
+                    {% if staff_form.first_name.errors %}<div class="field-error">{{ staff_form.first_name.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="field-group">
+                    <label for="{{ staff_form.last_name.id_for_label }}">Last name</label>
+                    {{ staff_form.last_name }}
+                    {% if staff_form.last_name.errors %}<div class="field-error">{{ staff_form.last_name.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="field-group">
+                    <label for="{{ staff_form.password1.id_for_label }}">Temporary password</label>
+                    {{ staff_form.password1 }}
+                    {% if staff_form.password1.errors %}<div class="field-error">{{ staff_form.password1.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="field-group">
+                    <label for="{{ staff_form.password2.id_for_label }}">Confirm password</label>
+                    {{ staff_form.password2 }}
+                    {% if staff_form.password2.errors %}<div class="field-error">{{ staff_form.password2.errors|join:", " }}</div>{% endif %}
+                </div>
+                <div class="field-group checkbox-group full-span">
+                    {{ staff_form.is_booking_approver }}
+                    <label for="{{ staff_form.is_booking_approver.id_for_label }}">This staff member can confirm bookings</label>
+                    {% if staff_form.is_booking_approver.errors %}<div class="field-error">{{ staff_form.is_booking_approver.errors|join:", " }}</div>{% endif %}
+                </div>
+            </div>
+            <button type="submit" class="primary-btn">Create staff account</button>
+        </form>
+    </article>
+
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Current team</p>
+                <h3>Staff accounts</h3>
+                <p class="settings-card-copy">A quick view of the staff logins currently available in the system.</p>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for staff_user in staff_users %}
+                <div class="stack-item staff-account-item">
+                    <div class="staff-account-head">
+                        <strong>{{ staff_user.get_full_name|default:staff_user.username }}</strong>
+                        <div class="chip-row">
+                            <span class="account-badge {% if staff_user.is_active %}active{% else %}inactive{% endif %}">
+                                {% if staff_user.is_active %}Active{% else %}Inactive{% endif %}
+                            </span>
+                            {% if staff_user.is_booking_approver %}
+                                <span class="account-badge active">Can confirm bookings</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div class="staff-account-meta">
+                        <span>@{{ staff_user.username }}</span>
+                        {% if staff_user.email %}
+                            <span>{{ staff_user.email }}</span>
+                        {% endif %}
+                    </div>
+                    <div class="chip-row">
+                        <a class="secondary-btn" href="{% url 'staff-edit' staff_user.pk %}">Edit</a>
+                        <form method="post" action="{% url 'staff-action' staff_user.pk 'reset-password' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="secondary-btn">Reset password</button>
+                        </form>
+                        <form method="post" action="{% url 'staff-action' staff_user.pk 'toggle-active' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="{% if staff_user.is_active %}danger-btn{% else %}secondary-btn{% endif %}">
+                                {% if staff_user.is_active %}Deactivate{% else %}Activate{% endif %}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            {% empty %}
+                <p class="muted-copy muted-copy-dark">No staff accounts yet.</p>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% else %}
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Access overview</p>
+            <h3>Your workspace permissions</h3>
+            <p class="settings-card-copy">This page is lighter for staff so only the practical access notes stay visible.</p>
+        </div>
+    </div>
+    <div class="stack-list">
+        <div class="stack-item">
+            <strong>Daily operations access</strong>
+            <p>You can create bookings, record payments, view notifications, and update fulfilment activity.</p>
+        </div>
+            <div class="stack-item">
+                <strong>Trusted confirmation access</strong>
+                <p>Only staff accounts marked as trusted approvers can confirm bookings. Catalog changes and staff setup stay with admin users.</p>
+            </div>
+        </div>
+</section>
+{% endif %}
+{% endblock %}

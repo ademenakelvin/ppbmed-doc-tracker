@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Reports | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Reports and Summary{% endblock %}
+{% block page_intro %}Use this summary to review revenue, booking health, payment mix, and the most requested rental items.{% endblock %}
+
+{% block content %}
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Exports</p>
+            <h3>Download reports</h3>
+        </div>
+        <div class="chip-row">
+            <a class="secondary-btn" href="{% url 'report-export' 'bookings' %}">Export bookings CSV</a>
+            <a class="secondary-btn" href="{% url 'report-export' 'payments' %}">Export payments CSV</a>
+        </div>
+    </div>
+</section>
+
+<section class="stats-grid">
+    <article class="stat-card">
+        <p>{{ current_month_label }} Revenue</p>
+        <strong>GHS {{ current_month_revenue|floatformat:2 }}</strong>
+        <span>Payments recorded for this month.</span>
+    </article>
+    <article class="stat-card">
+        <p>{{ current_year_label }} Revenue</p>
+        <strong>GHS {{ current_year_revenue|floatformat:2 }}</strong>
+        <span>Payments recorded this year.</span>
+    </article>
+    <article class="stat-card">
+        <p>Overall Revenue</p>
+        <strong>GHS {{ overall_revenue|floatformat:2 }}</strong>
+        <span>All manual payments on record.</span>
+    </article>
+    <article class="stat-card">
+        <p>Outstanding Bookings</p>
+        <strong>{{ outstanding_bookings }}</strong>
+        <span>Bookings that are not fully paid yet.</span>
+    </article>
+    <article class="stat-card">
+        <p>Completed Bookings</p>
+        <strong>{{ completed_bookings }}</strong>
+        <span>Jobs fully returned and closed.</span>
+    </article>
+</section>
+
+<section class="content-grid three-column">
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Bookings</p>
+                <h3>Status breakdown</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for row in status_breakdown %}
+                <div class="stack-item">
+                    <strong>{{ row.status|title }}</strong>
+                    <small>{{ row.total }} booking(s)</small>
+                </div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Payments</p>
+                <h3>Payment status mix</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for row in payment_breakdown %}
+                <div class="stack-item">
+                    <strong>{{ row.payment_status|title }}</strong>
+                    <small>{{ row.total }} booking(s)</small>
+                </div>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Demand</p>
+                <h3>Most booked items</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for row in top_items %}
+                <div class="stack-item">
+                    <strong>{{ row.item_name }}</strong>
+                    <small>{{ row.total_quantity }} unit(s) booked</small>
+                </div>
+            {% empty %}
+                <p class="muted-copy">No item usage data yet.</p>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+
+<section class="content-grid two-column">
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Revenue</p>
+                <h3>Top revenue items</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for row in top_revenue_items %}
+                <div class="stack-item">
+                    <strong>{{ row.item_name }}</strong>
+                    <small>Revenue: GHS {{ row.revenue|floatformat:2 }}</small>
+                </div>
+            {% empty %}
+                <p class="muted-copy">No revenue data yet.</p>
+            {% endfor %}
+        </div>
+    </article>
+
+    <article class="panel-card">
+        <div class="panel-head">
+            <div>
+                <p class="eyebrow">Staff usage</p>
+                <h3>Activity by staff user</h3>
+            </div>
+        </div>
+        <div class="stack-list">
+            {% for row in activity_by_staff %}
+                <div class="stack-item">
+                    <strong>{{ row.staff_name|default:"System" }}</strong>
+                    <small>{{ row.total_actions }} action(s) logged</small>
+                </div>
+            {% empty %}
+                <p class="muted-copy">No activity data yet.</p>
+            {% endfor %}
+        </div>
+    </article>
+</section>
+{% endblock %}

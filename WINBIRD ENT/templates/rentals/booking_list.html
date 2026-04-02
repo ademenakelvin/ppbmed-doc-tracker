@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+
+{% block title %}Bookings | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Booking Management{% endblock %}
+{% block page_intro %}Track every booking from pending request to return and completion, with payment status visible at a glance.{% endblock %}
+
+{% block content %}
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Bookings</p>
+            <h3>Customer rental jobs</h3>
+            <p class="muted-copy muted-copy-dark">{{ active_view_copy }}</p>
+        </div>
+        <div class="chip-row">
+            <a class="secondary-btn" href="{% url 'return-tracker' %}">Return tracker</a>
+            <a class="primary-btn" href="{% url 'booking-add' %}">Create booking</a>
+        </div>
+    </div>
+
+    <form method="get" class="stacked-form booking-filter-form">
+        <div class="field-grid three-up booking-filter-grid">
+            <div class="field-group">
+                <label for="booking-search">Search</label>
+                <input id="booking-search" class="form-control" type="text" name="q" value="{{ search_query }}" placeholder="Booking #, customer, or phone">
+            </div>
+            <div class="field-group">
+                <label for="booking-event-date">Event date</label>
+                <input id="booking-event-date" class="form-control" type="date" name="event_date" value="{{ selected_event_date }}">
+            </div>
+            <div class="field-group">
+                <label for="booking-status">Status</label>
+                <select id="booking-status" class="form-select" name="status">
+                    <option value="">All booking states</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}"{% if selected_status == value %} selected{% endif %}>{{ label }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="booking-scope">View</label>
+                <select id="booking-scope" class="form-select" name="view">
+                    <option value="">All bookings</option>
+                    <option value="today"{% if selected_view == 'today' %} selected{% endif %}>Today's schedule</option>
+                    <option value="mine"{% if selected_view == 'mine' %} selected{% endif %}>My bookings</option>
+                </select>
+            </div>
+            <div class="field-group">
+                <label for="booking-display">Display</label>
+                <select id="booking-display" class="form-select" name="display">
+                    <option value="list"{% if display_mode != 'calendar' %} selected{% endif %}>List view</option>
+                    <option value="calendar"{% if display_mode == 'calendar' %} selected{% endif %}>Calendar view</option>
+                </select>
+            </div>
+        </div>
+        <div class="page-actions">
+            <button type="submit" class="primary-btn">Apply filters</button>
+            <a class="secondary-btn" href="{% url 'booking-list' %}">Clear filters</a>
+        </div>
+    </form>
+
+    {% if display_mode == 'calendar' %}
+        <section class="panel-card schedule-panel">
+            <div class="panel-head">
+                <div>
+                    <p class="eyebrow">Schedule</p>
+                    <h3>{{ calendar_month|date:"F Y" }}</h3>
+                </div>
+                <div class="chip-row">
+                    <a class="secondary-btn" href="{% url 'booking-list' %}?{{ calendar_previous_query }}">Previous month</a>
+                    <a class="secondary-btn" href="{% url 'booking-list' %}?{{ calendar_next_query }}">Next month</a>
+                </div>
+            </div>
+            <div class="schedule-calendar">
+                <div class="schedule-weekdays">
+                    <span>Mon</span>
+                    <span>Tue</span>
+                    <span>Wed</span>
+                    <span>Thu</span>
+                    <span>Fri</span>
+                    <span>Sat</span>
+                    <span>Sun</span>
+                </div>
+                <div class="schedule-grid">
+                    {% for week in calendar_weeks %}
+                        {% for day in week %}
+                            <article class="schedule-day {% if not day.in_month %}is-muted{% endif %} {% if day.is_today %}is-today{% endif %}">
+                                <div class="schedule-day-head">
+                                    <strong>{{ day.date|date:"j" }}</strong>
+                                    <span>{{ day.bookings|length }} job{{ day.bookings|length|pluralize }}</span>
+                                </div>
+                                <div class="schedule-day-list">
+                                    {% for booking in day.bookings %}
+                                        <a class="schedule-booking" href="{% url 'booking-detail' booking.pk %}">
+                                            <strong>#{{ booking.pk }}</strong>
+                                            <span>{{ booking.customer.name }}</span>
+                                            <small>{{ booking.get_status_display }} | {{ booking.get_payment_status_display }}</small>
+                                        </a>
+                                    {% empty %}
+                                        <span class="schedule-empty">No jobs</span>
+                                    {% endfor %}
+                                </div>
+                            </article>
+                        {% endfor %}
+                    {% endfor %}
+                </div>
+            </div>
+        </section>
+    {% else %}
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Customer</th>
+                        <th>Phone</th>
+                        <th>Event Date</th>
+                        <th>Return Due</th>
+                        <th>Total</th>
+                        <th>Payment</th>
+                        <th>Status</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                        <tr>
+                            <td>#{{ booking.pk }}</td>
+                            <td><a href="{% url 'customer-detail' booking.customer.pk %}">{{ booking.customer.name }}</a></td>
+                            <td>{{ booking.customer.phone }}</td>
+                            <td>{{ booking.event_date }}</td>
+                            <td>{{ booking.return_due_date }}</td>
+                            <td>GHS {{ booking.total_amount|floatformat:2 }}</td>
+                            <td><span class="status-pill" data-status="{{ booking.payment_status }}">{{ booking.get_payment_status_display }}</span></td>
+                            <td><span class="status-pill" data-status="{{ booking.status }}">{{ booking.get_status_display }}</span></td>
+                            <td><a href="{% url 'booking-detail' booking.pk %}">Open</a></td>
+                        </tr>
+                    {% empty %}
+                        <tr><td colspan="9">No bookings found for this view.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if is_paginated %}
+            <div class="pagination-row">
+                {% if page_obj.has_previous %}
+                    <a class="secondary-btn" href="?page={{ page_obj.previous_page_number }}{% if page_query %}&{{ page_query }}{% endif %}">Previous</a>
+                {% endif %}
+                <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                    <a class="secondary-btn" href="?page={{ page_obj.next_page_number }}{% if page_query %}&{{ page_query }}{% endif %}">Next</a>
+                {% endif %}
+            </div>
+        {% endif %}
+    {% endif %}
+</section>
+{% endblock %}

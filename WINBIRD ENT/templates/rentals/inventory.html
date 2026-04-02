@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Inventory | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Inventory Overview{% endblock %}
+{% block page_intro %}Watch total stock, on-hand availability, and same-day reservation pressure across the rental catalog.{% endblock %}
+
+{% block content %}
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Inventory</p>
+            <h3>Current stock and reserved demand</h3>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Item</th>
+                    <th>Category</th>
+                    <th>Total Stock</th>
+                    <th>Available Now</th>
+                    <th>Reserved Today</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in inventory_rows %}
+                    <tr>
+                        <td>{{ row.inventory.rental_item.name }}</td>
+                        <td>{{ row.inventory.rental_item.category.name }}</td>
+                        <td>{{ row.inventory.quantity_total }}</td>
+                        <td>{{ row.inventory.quantity_available }}</td>
+                        <td>{{ row.reserved_today }}</td>
+                        <td>
+                            {% if request.user.can_manage_catalog %}
+                                <a href="{% url 'item-edit' row.inventory.rental_item.pk %}">Update</a>
+                            {% else %}
+                                <span class="muted-copy">View only</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6">Inventory will appear here once items are added.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+{% endblock %}

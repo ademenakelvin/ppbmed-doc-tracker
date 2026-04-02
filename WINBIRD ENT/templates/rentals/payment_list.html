@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Payments | WINBIRD Enterprise{% endblock %}
+{% block page_heading %}Payment Tracking{% endblock %}
+{% block page_intro %}Review recorded payments and move back into the related booking whenever more follow-up is needed.{% endblock %}
+
+{% block content %}
+<section class="panel-card">
+    <div class="panel-head">
+        <div>
+            <p class="eyebrow">Payments</p>
+            <h3>Recorded manual payments</h3>
+        </div>
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking</th>
+                    <th>Customer</th>
+                    <th>Amount</th>
+                    <th>Paid On</th>
+                    <th>Recorded By</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for payment in payments %}
+                    <tr>
+                        <td>#{{ payment.booking.pk }}</td>
+                        <td>{{ payment.booking.customer.name }}</td>
+                        <td>GHS {{ payment.amount|floatformat:2 }}</td>
+                        <td>{{ payment.paid_on }}</td>
+                        <td>{{ payment.recorded_by }}</td>
+                        <td>
+                            <div class="chip-row">
+                                <a href="{% url 'payment-receipt' payment.pk %}">Receipt</a>
+                                <a href="{% url 'booking-detail' payment.booking.pk %}">Open booking</a>
+                            </div>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="6">No payments have been entered yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if is_paginated %}
+        <div class="pagination-row">
+            {% if page_obj.has_previous %}
+                <a class="secondary-btn" href="?page={{ page_obj.previous_page_number }}">Previous</a>
+            {% endif %}
+            <span>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+            {% if page_obj.has_next %}
+                <a class="secondary-btn" href="?page={{ page_obj.next_page_number }}">Next</a>
+            {% endif %}
+        </div>
+    {% endif %}
+</section>
+{% endblock %}
