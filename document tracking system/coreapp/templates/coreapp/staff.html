@@ -1,0 +1,222 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Staff | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}?v=20260330e">{% endblock %}
+{% block page_title %}Staff{% endblock %}
+{% block page_subtitle %}Staff directory and access.{% endblock %}
+
+{% block content %}
+<section class="records-hero">
+    <div class="records-hero-copy">
+        <div class="records-badge"><i class="fas fa-users"></i><span>Staff directory</span></div>
+        <h2>Staff directory.</h2>
+        <p>Manage officers, roles, and login access.</p>
+    </div>
+</section>
+
+<section class="documents-summary-grid">
+    <div class="mini-stat-card blue">
+        <div class="mini-stat-icon"><i class="fas fa-users"></i></div>
+        <div class="mini-stat-text">
+            <p>Total Staff</p>
+            <h3>{{ staff_total_count }}</h3>
+        </div>
+    </div>
+
+    <div class="mini-stat-card green">
+        <div class="mini-stat-icon"><i class="fas fa-user-check"></i></div>
+        <div class="mini-stat-text">
+            <p>Active</p>
+            <h3>{{ staff_active_count }}</h3>
+        </div>
+    </div>
+
+    <div class="mini-stat-card red">
+        <div class="mini-stat-icon"><i class="fas fa-user-slash"></i></div>
+        <div class="mini-stat-text">
+            <p>Inactive</p>
+            <h3>{{ staff_inactive_count }}</h3>
+        </div>
+    </div>
+
+    <div class="mini-stat-card orange">
+        <div class="mini-stat-icon"><i class="fas fa-user-tie"></i></div>
+        <div class="mini-stat-text">
+            <p>Directors</p>
+            <h3>{{ staff_directors_count }}</h3>
+        </div>
+    </div>
+
+    <div class="mini-stat-card orange">
+        <div class="mini-stat-icon"><i class="fas fa-box-archive"></i></div>
+        <div class="mini-stat-text">
+            <p>Archived</p>
+            <h3>{{ staff_archived_count }}</h3>
+        </div>
+    </div>
+</section>
+
+<div class="card records-card">
+    <div class="card-header staff-header records-card-header">
+        <h2>Staff Members</h2>
+        {% if not staff_directory_read_only %}
+        <a href="{% url 'add_staff' %}" class="save-btn">Add Staff</a>
+        {% else %}
+        <span class="records-panel-pill">Read-only directory</span>
+        {% endif %}
+    </div>
+
+    <div class="panel-body">
+        <form method="get" class="documents-top-filter">
+            <div class="documents-search-box">
+                <i class="fas fa-search"></i>
+                <input
+                    type="text"
+                    name="search"
+                    placeholder="Search staff..."
+                    value="{{ search_query }}"
+                >
+            </div>
+
+            <select name="role" class="documents-select">
+                <option value="">Role: All</option>
+                <option value="Director" {% if role_filter == "Director" %}selected{% endif %}>Director</option>
+                <option value="Deputy Director" {% if role_filter == "Deputy Director" %}selected{% endif %}>Deputy Director</option>
+                <option value="Staff" {% if role_filter == "Staff" %}selected{% endif %}>Staff</option>
+                <option value="Registry" {% if role_filter == "Registry" %}selected{% endif %}>Registry</option>
+                <option value="Admin" {% if role_filter == "Admin" %}selected{% endif %}>Admin</option>
+            </select>
+
+            <select name="active" class="documents-select">
+                <option value="">Status: All</option>
+                <option value="active" {% if active_filter == "active" %}selected{% endif %}>Active</option>
+                <option value="inactive" {% if active_filter == "inactive" %}selected{% endif %}>Inactive</option>
+            </select>
+
+            <select name="archive" class="documents-select">
+                <option value="active" {% if archive_filter == "active" %}selected{% endif %}>Active only</option>
+                <option value="archived" {% if archive_filter == "archived" %}selected{% endif %}>Archived only</option>
+                <option value="all" {% if archive_filter == "all" %}selected{% endif %}>Active + Archived</option>
+            </select>
+
+            <button type="submit" class="documents-filter-btn">
+                <i class="fas fa-sliders-h"></i>
+                <span>Filter</span>
+            </button>
+
+            <a href="{% url 'staff' %}" class="documents-reset-btn">Reset</a>
+        </form>
+    </div>
+
+    <div class="table-wrap">
+        <table class="documents-table">
+            <thead>
+                <tr>
+                    <th>Django User</th>
+                    <th>Login Account</th>
+                    <th>Full Name</th>
+                    <th>Role</th>
+                    <th>Department</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Lifecycle</th>
+                    {% if not staff_directory_read_only %}
+                    <th>Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% if staff_members %}
+                    {% for staff in staff_members %}
+                    <tr>
+                        <td>{% if staff.user %}{{ staff.user.username }}{% else %}-{% endif %}</td>
+
+                        <td>
+                            {% if staff.user %}
+                                <span class="table-badge status-badge status-completed">
+                                    <span class="status-dot"></span>
+                                    Linked User
+                                </span>
+                            {% else %}
+                                <span class="table-badge status-badge status-overdue">
+                                    <span class="status-dot"></span>
+                                    No Login
+                                </span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ staff.full_name }}</td>
+                        <td>{{ staff.role }}</td>
+                        <td>{{ staff.department|default:"-" }}</td>
+                        <td>{{ staff.email|default:"-" }}</td>
+                        <td>
+                            {% if staff.is_active %}
+                                <span class="table-badge status-badge status-completed">
+                                    <span class="status-dot"></span>
+                                    Active
+                                </span>
+                            {% else %}
+                                <span class="table-badge status-badge status-overdue">
+                                    <span class="status-dot"></span>
+                                    Inactive
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="table-badge {% if staff.is_archived %}badge-red{% else %}badge-green{% endif %}">
+                                {% if staff.is_archived %}Archived{% else %}Active{% endif %}
+                            </span>
+                        </td>
+                        {% if not staff_directory_read_only %}
+                        <td>
+                            <div class="table-actions">
+                                <a href="{% url 'edit_staff' staff.pk %}" class="action-icon-btn edit-btn-sm" title="Edit Staff">
+                                    <i class="fas fa-pen"></i>
+                                </a>
+                                {% if staff.is_archived %}
+                                <a href="{% url 'restore_staff' staff.pk %}" class="action-icon-btn edit-btn-sm" title="Restore Staff">
+                                    <i class="fas fa-rotate-left"></i>
+                                </a>
+                                {% else %}
+                                <a href="{% url 'delete_staff' staff.pk %}" class="action-icon-btn delete-btn-sm" title="Archive Staff">
+                                    <i class="fas fa-box-archive"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="{% if staff_directory_read_only %}8{% else %}9{% endif %}" class="empty-row">No staff members found.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if staff_members.has_other_pages %}
+    <div class="pagination-wrap">
+        <div class="pagination-info">
+            Page {{ staff_members.number }} of {{ staff_members.paginator.num_pages }}
+        </div>
+
+        <div class="pagination-controls">
+            {% if staff_members.has_previous %}
+                <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if active_filter %}&active={{ active_filter }}{% endif %}{% if archive_filter %}&archive={{ archive_filter }}{% endif %}" class="pagination-btn">First</a>
+                <a href="?page={{ staff_members.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if active_filter %}&active={{ active_filter }}{% endif %}{% if archive_filter %}&archive={{ archive_filter }}{% endif %}" class="pagination-btn">Previous</a>
+            {% endif %}
+
+            <span class="pagination-current">{{ staff_members.number }}</span>
+
+            {% if staff_members.has_next %}
+                <a href="?page={{ staff_members.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if active_filter %}&active={{ active_filter }}{% endif %}{% if archive_filter %}&archive={{ archive_filter }}{% endif %}" class="pagination-btn">Next</a>
+                <a href="?page={{ staff_members.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if role_filter %}&role={{ role_filter }}{% endif %}{% if active_filter %}&active={{ active_filter }}{% endif %}{% if archive_filter %}&archive={{ archive_filter }}{% endif %}" class="pagination-btn">Last</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

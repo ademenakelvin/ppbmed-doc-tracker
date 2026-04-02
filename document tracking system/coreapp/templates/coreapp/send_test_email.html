@@ -1,0 +1,111 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Send Test Email | PPBMED{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}?v=20260330d">
+<style>
+    .test-email-shell {
+        display: grid;
+        gap: 22px;
+        max-width: 860px;
+    }
+
+    .test-email-card {
+        border-radius: 26px;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
+        background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    }
+
+    .test-email-body {
+        padding: 24px;
+        display: grid;
+        gap: 18px;
+    }
+
+    .test-email-note {
+        padding: 18px 20px;
+        border-radius: 18px;
+        border: 1px solid #dbe7f4;
+        background: #f8fbff;
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .test-email-note strong {
+        color: #0f172a;
+    }
+
+    body.theme-dark .test-email-card {
+        border-color: #334155;
+        background: linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(17, 24, 39, 0.98) 100%);
+        box-shadow: 0 20px 36px rgba(2, 6, 23, 0.35);
+    }
+
+    body.theme-dark .test-email-note {
+        background: rgba(15, 23, 42, 0.76);
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+
+    body.theme-dark .test-email-note strong {
+        color: #f8fafc;
+    }
+</style>
+{% endblock %}
+{% block page_title %}Send Test Email{% endblock %}
+{% block page_subtitle %}Verify that SMTP is working before relying on OTP delivery.{% endblock %}
+
+{% block content %}
+<div class="test-email-shell">
+    <section class="records-workspace-hero">
+        <div class="records-workspace-copy">
+            <div class="records-badge"><i class="fas fa-envelope-circle-check"></i><span>SMTP check</span></div>
+            <h2>Send a live test email from the system.</h2>
+            <p>Use this before staff onboarding or privileged sign-ins so you know OTP and alert email delivery is working.</p>
+        </div>
+
+        <div class="records-workspace-side">
+            <div class="records-hero-summary">
+                <span class="records-hero-summary-label">Email Backend</span>
+                <strong>{{ email_backend }}</strong>
+                <p>Current configured backend.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="test-email-card">
+        <div class="card-header records-card-header">
+            <div>
+                <span class="records-section-eyebrow">Test Message</span>
+                <h2>Email delivery check</h2>
+            </div>
+        </div>
+
+        <div class="test-email-body">
+            <div class="test-email-note">
+                <strong>From address:</strong> {{ default_from_email|default:"Not configured" }}<br>
+                <strong>Tip:</strong> If the backend is still set to console mode, the message will appear in the terminal instead of a real inbox.
+            </div>
+
+            <form method="post" class="document-form">
+                {% csrf_token %}
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label for="id_target_email">Recipient Email</label>
+                        <input type="email" name="target_email" id="id_target_email" class="form-control" value="{{ default_email }}" required>
+                    </div>
+                </div>
+
+                <div class="settings-action-row compact-row">
+                    <a href="{% url 'security_checklist' %}" class="settings-secondary-btn">Back</a>
+                    <button type="submit" class="settings-action-btn">Send Test Email</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

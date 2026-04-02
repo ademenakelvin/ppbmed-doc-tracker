@@ -1,0 +1,162 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Outgoing Documents | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}">{% endblock %}
+{% block page_title %}Outgoing Documents{% endblock %}
+{% block page_subtitle %}Outgoing documents and dispatch status.{% endblock %}
+
+{% block content %}
+<div class="records-page-shell">
+    <section class="records-workspace-hero">
+        <div class="records-workspace-copy">
+            <div class="records-badge"><i class="fas fa-paper-plane"></i><span>Outgoing desk</span></div>
+            <h2>Outgoing mail at a glance.</h2>
+            <p>Monitor sent items, pending dispatch, and overdue work.</p>
+        </div>
+
+        <div class="records-workspace-side">
+            <div class="records-hero-summary">
+                <span class="records-hero-summary-label">Overdue</span>
+                <strong>{{ outgoing_overdue_count }}</strong>
+                <p>item{{ outgoing_overdue_count|pluralize }} past due date.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="documents-summary-grid">
+        <div class="mini-stat-card blue">
+            <div class="mini-stat-icon"><i class="fas fa-paper-plane"></i></div>
+            <div class="mini-stat-text">
+                <p>Total Outgoing</p>
+                <h3>{{ outgoing_total_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card orange">
+            <div class="mini-stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="mini-stat-text">
+                <p>Pending</p>
+                <h3>{{ outgoing_pending_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card green">
+            <div class="mini-stat-icon"><i class="fas fa-circle-check"></i></div>
+            <div class="mini-stat-text">
+                <p>Completed</p>
+                <h3>{{ outgoing_completed_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card red">
+            <div class="mini-stat-icon"><i class="fas fa-circle-exclamation"></i></div>
+            <div class="mini-stat-text">
+                <p>Overdue</p>
+                <h3>{{ outgoing_overdue_count }}</h3>
+            </div>
+        </div>
+    </section>
+
+    <div class="card records-card data-panel-card">
+        <div class="card-header records-card-header data-panel-header">
+            <div>
+                <span class="records-section-eyebrow">Outgoing</span>
+                <h2>Outgoing documents</h2>
+            </div>
+            <span class="data-panel-note">{{ outgoing_total_count }} outgoing records</span>
+        </div>
+
+        <div class="panel-body data-panel-toolbar">
+            <form method="get" class="documents-top-filter modern-filter-bar">
+                <div class="documents-search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" placeholder="Search outgoing documents..." value="{{ search_query }}">
+                </div>
+
+                <select name="status" class="documents-select">
+                    <option value="">Status: All</option>
+                    <option value="Pending" {% if status_filter == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="In Progress" {% if status_filter == "In Progress" %}selected{% endif %}>In Progress</option>
+                    <option value="Completed" {% if status_filter == "Completed" %}selected{% endif %}>Completed</option>
+                    <option value="Overdue" {% if status_filter == "Overdue" %}selected{% endif %}>Overdue</option>
+                </select>
+
+                <select name="priority" class="documents-select">
+                    <option value="">Priority: All</option>
+                    <option value="Low" {% if priority_filter == "Low" %}selected{% endif %}>Low</option>
+                    <option value="Medium" {% if priority_filter == "Medium" %}selected{% endif %}>Medium</option>
+                    <option value="High" {% if priority_filter == "High" %}selected{% endif %}>High</option>
+                </select>
+
+                <button type="submit" class="documents-filter-btn">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Filter</span>
+                </button>
+
+                <a href="{% url 'outgoing' %}" class="documents-reset-btn">Reset</a>
+            </form>
+        </div>
+
+        <div class="table-wrap modern-table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Reference ID</th>
+                        <th>Subject</th>
+                        <th>Document Type</th>
+                        <th>Origin</th>
+                        <th>Destination</th>
+                        <th>Assigned To</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                        <th>Date Received</th>
+                        <th>Due Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if documents %}
+                        {% for doc in documents %}
+                        <tr>
+                            <td><a href="{% url 'document_detail' doc.pk %}" class="table-link strong-link">{{ doc.reference_id }}</a></td>
+                            <td>{{ doc.subject }}</td>
+                            <td>{{ doc.document_type|default:"-" }}</td>
+                            <td>{{ doc.origin }}</td>
+                            <td>{{ doc.destination }}</td>
+                            <td>{% if doc.assigned_to %}{{ doc.assigned_to.full_name }}{% else %}-{% endif %}</td>
+                            <td>{{ doc.status }}</td>
+                            <td>{{ doc.priority }}</td>
+                            <td>{{ doc.date_received }}</td>
+                            <td>{{ doc.due_date|default:"-" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="10" class="empty-row">No outgoing documents found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if documents.has_other_pages %}
+        <div class="pagination-wrap">
+            <div class="pagination-info">Page {{ documents.number }} of {{ documents.paginator.num_pages }}</div>
+            <div class="pagination-controls">
+                {% if documents.has_previous %}
+                    <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}" class="pagination-btn">First</a>
+                    <a href="?page={{ documents.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}" class="pagination-btn">Previous</a>
+                {% endif %}
+
+                <span class="pagination-current">{{ documents.number }}</span>
+
+                {% if documents.has_next %}
+                    <a href="?page={{ documents.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}" class="pagination-btn">Next</a>
+                    <a href="?page={{ documents.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}" class="pagination-btn">Last</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

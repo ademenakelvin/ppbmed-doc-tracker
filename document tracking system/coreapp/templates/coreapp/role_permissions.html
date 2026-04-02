@@ -1,0 +1,348 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Role Permissions | PPBMED{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'coreapp/css/settings-page.css' %}">
+<style>
+    .permissions-shell {
+        max-width: 1280px;
+        margin: 0 auto;
+        display: grid;
+        gap: 18px;
+    }
+
+    .permissions-summary {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 14px;
+    }
+
+    .permissions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 16px;
+    }
+
+    .permissions-simple-hero {
+        padding: 24px 26px;
+        border-radius: 24px;
+        border: 1px solid #e5ecf6;
+        background: #ffffff;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.05);
+        display: grid;
+        gap: 10px;
+    }
+
+    .permissions-simple-hero .settings-badge {
+        margin-bottom: 0;
+        width: fit-content;
+    }
+
+    .permissions-simple-hero h2 {
+        font-size: clamp(1.7rem, 2.4vw, 2.35rem);
+        line-height: 1.1;
+        letter-spacing: -0.04em;
+        color: #0f172a;
+        margin: 0;
+    }
+
+    .permissions-simple-hero p {
+        color: #526277;
+        line-height: 1.7;
+        max-width: 68ch;
+        margin: 0;
+    }
+
+    .permissions-summary-card {
+        padding: 18px 20px;
+        border-radius: 20px;
+        border: 1px solid #e5ecf6;
+        background: #ffffff;
+        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.04);
+    }
+
+    .permissions-summary-card span {
+        display: block;
+        font-size: 12px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: #94a3b8;
+        margin-bottom: 8px;
+    }
+
+    .permissions-summary-card strong {
+        display: block;
+        color: #0f172a;
+        font-size: 1.35rem;
+        margin-bottom: 4px;
+    }
+
+    .permissions-summary-card p {
+        color: #64748b;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .permission-role-card {
+        border-radius: 22px;
+        border: 1px solid #e5ecf6;
+        background: #ffffff;
+        box-shadow: 0 14px 30px rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+    }
+
+    .permission-role-card[open] {
+        box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+    }
+
+    .permission-role-summary {
+        list-style: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 20px;
+        cursor: pointer;
+    }
+
+    .permission-role-summary::-webkit-details-marker {
+        display: none;
+    }
+
+    .permission-role-summary::marker {
+        content: "";
+    }
+
+    .permission-role-meta {
+        display: grid;
+        gap: 4px;
+    }
+
+    .permission-role-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        font-size: 12px;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .permission-role-body {
+        display: grid;
+        gap: 14px;
+        padding: 0 20px 20px;
+        border-top: 1px solid #edf2f8;
+    }
+
+    .permission-role-head strong {
+        display: block;
+        font-size: 1.2rem;
+        color: #0f172a;
+        margin-bottom: 4px;
+    }
+
+    .permission-role-head p {
+        color: #64748b;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .permission-switch-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .permission-switch-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 14px;
+        padding: 14px 16px;
+        border-radius: 16px;
+        border: 1px solid #e8eef6;
+        background: #f8fbff;
+    }
+
+    .permission-switch-item strong {
+        display: block;
+        color: #0f172a;
+        margin-bottom: 3px;
+        font-size: 0.97rem;
+    }
+
+    .permission-switch-item p {
+        color: #64748b;
+        line-height: 1.55;
+        font-size: 13px;
+        margin: 0;
+    }
+
+    .permissions-action-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        padding: 18px 20px;
+        border-radius: 20px;
+        border: 1px solid #dbe5f0;
+        background: #ffffff;
+    }
+
+    .permissions-action-bar p {
+        color: #526277;
+        line-height: 1.6;
+        max-width: 62ch;
+        margin: 0;
+    }
+
+    .theme-dark .permissions-simple-hero,
+    .theme-dark .permissions-summary-card,
+    .theme-dark .permission-role-card,
+    .theme-dark .permission-switch-item,
+    .theme-dark .permissions-action-bar {
+        background: rgba(15, 23, 42, 0.82);
+        border-color: rgba(148, 163, 184, 0.18);
+        box-shadow: 0 18px 34px rgba(2, 6, 23, 0.32);
+    }
+
+    .theme-dark .permissions-simple-hero h2,
+    .theme-dark .permissions-summary-card strong,
+    .theme-dark .permission-role-head strong,
+    .theme-dark .permission-switch-item strong {
+        color: #f8fbff;
+    }
+
+    .theme-dark .permission-role-body {
+        border-top-color: rgba(148, 163, 184, 0.14);
+    }
+
+    .theme-dark .permission-role-count {
+        background: rgba(37, 99, 235, 0.18);
+        color: #93c5fd;
+    }
+
+    .theme-dark .permissions-shell .settings-badge {
+        color: #93c5fd;
+    }
+
+    .theme-dark .permissions-simple-hero p,
+    .theme-dark .permissions-summary-card p,
+    .theme-dark .permission-role-head p,
+    .theme-dark .permission-switch-item p,
+    .theme-dark .permissions-action-bar p {
+        color: #c2d2ea;
+    }
+
+    .theme-dark .permissions-summary-card span {
+        color: #8fb3df;
+    }
+
+    @media (max-width: 760px) {
+        .permission-switch-item,
+        .permissions-action-bar {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .permission-role-summary {
+            align-items: flex-start;
+            flex-direction: column;
+        }
+
+        .permissions-simple-hero {
+            padding: 20px;
+        }
+
+        .permissions-action-bar .settings-primary-btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+{% block page_title %}Role Permissions{% endblock %}
+{% block page_subtitle %}IT/Admin controls for what each operational role can access across the system.{% endblock %}
+
+{% block content %}
+<div class="permissions-shell">
+    <section class="permissions-simple-hero">
+        <span class="settings-badge"><i class="fas fa-sliders"></i> Central Access Control</span>
+        <h2>Set role access in one place.</h2>
+        <p>Keep permissions simple here. Turn access on or off for each role without changing code or opening multiple admin pages.</p>
+    </section>
+
+    <section class="permissions-summary">
+        <div class="permissions-summary-card">
+            <span>Roles</span>
+            <strong>{{ role_permission_rows|length }}</strong>
+            <p>Permission groups available to manage.</p>
+        </div>
+        <div class="permissions-summary-card">
+            <span>Rules</span>
+            <strong>{{ permission_definitions|length }}</strong>
+            <p>Access switches available across the system.</p>
+        </div>
+        <div class="permissions-summary-card">
+            <span>Managed By</span>
+            <strong>IT / Admin</strong>
+            <p>Operational access is controlled from this page.</p>
+        </div>
+    </section>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="permissions-grid">
+            {% for row in role_permission_rows %}
+            <details class="permission-role-card" {% if forloop.first %}open{% endif %}>
+                <summary class="permission-role-summary">
+                    <div class="permission-role-head permission-role-meta">
+                        <strong>{{ row.role }}</strong>
+                        <p>Open to manage this role's access.</p>
+                    </div>
+                    <span class="permission-role-count">{{ row.permissions|length }} permissions</span>
+                </summary>
+
+                <div class="permission-role-body">
+                    <div class="permission-role-head">
+                        <p>Adjust what this role can view or manage throughout the document tracking workflow.</p>
+                    </div>
+
+                    <div class="permission-switch-list">
+                        {% for permission in row.permissions %}
+                        <label class="permission-switch-item">
+                            <div>
+                                <strong>{{ permission.label }}</strong>
+                                <p>{{ permission.description }}</p>
+                            </div>
+
+                            <span class="modern-switch">
+                                <span class="switch">
+                                    <input
+                                        type="checkbox"
+                                        name="{{ row.role }}__{{ permission.key }}"
+                                        {% if permission.enabled %}checked{% endif %}
+                                    >
+                                    <span class="slider"></span>
+                                </span>
+                            </span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+            </details>
+            {% endfor %}
+        </div>
+
+        <div class="permissions-action-bar">
+            <p>Changes take effect the next time each page checks permissions. This gives you one place to tighten or expand access without editing code.</p>
+            <button type="submit" class="settings-primary-btn">Save Permission Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,538 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}PPBMED{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'coreapp/css/dashboard.css' %}">
+    <link rel="stylesheet" href="{% static 'coreapp/css/dashboard-layout.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    {% block extra_css %}{% endblock %}
+    <link rel="stylesheet" href="{% static 'coreapp/css/modern-theme.css' %}?v=20260331b">
+</head>
+<body class="{% if dark_mode_enabled %}theme-dark{% endif %}">
+    <div class="dashboard-container" id="dashboardContainer">
+        <aside class="sidebar" id="sidebar">
+            <div class="logo-area small-logo">
+                <div class="logo-box">P</div>
+                <div class="logo-text sidebar-text">
+                    <h2>PPBMED</h2>
+                    <p>Document Tracking System</p>
+                </div>
+            </div>
+
+            <button type="button" class="sidebar-toggle" id="sidebarToggle" title="Toggle Sidebar">
+                <i class="fas fa-bars"></i>
+            </button>
+
+            <nav class="sidebar-menu">
+                <a href="{% url 'dashboard' %}" class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-house"></i><span class="sidebar-text">Dashboard</span>
+                </a>
+
+                {% if permission_flags.view_documents %}
+                <a href="{% url 'documents' %}" class="menu-item {% if request.resolver_match.url_name == 'documents' %}active{% endif %}">
+                    <i class="fas fa-folder-open"></i><span class="sidebar-text">Documents</span>
+                </a>
+                {% endif %}
+
+                {% if permission_flags.view_incoming %}
+                <a href="{% url 'incoming' %}" class="menu-item {% if request.resolver_match.url_name == 'incoming' %}active{% endif %}">
+                    <i class="fas fa-inbox"></i><span class="sidebar-text">Incoming</span>
+                </a>
+                {% endif %}
+
+                {% if permission_flags.view_outgoing %}
+                <a href="{% url 'outgoing' %}" class="menu-item {% if request.resolver_match.url_name == 'outgoing' %}active{% endif %}">
+                    <i class="fas fa-paper-plane"></i><span class="sidebar-text">Outgoing</span>
+                </a>
+                {% endif %}
+
+                {% if permission_flags.view_tracking %}
+                <a href="{% url 'tracking' %}" class="menu-item {% if request.resolver_match.url_name == 'tracking' %}active{% endif %}">
+                    <i class="fas fa-arrows-rotate"></i><span class="sidebar-text">Tracking</span>
+                </a>
+                {% endif %}
+
+                {% if permission_flags.view_messages %}
+                <a href="{% url 'messages' %}" class="menu-item {% if request.resolver_match.url_name == 'messages' %}active{% endif %}">
+                    <i class="fas fa-envelope"></i><span class="sidebar-text">Messages</span>
+                    {% if unread_messages_count > 0 %}
+                        <span class="menu-badge">{{ unread_messages_count }}</span>
+                    {% endif %}
+                </a>
+                {% endif %}
+
+                {% if permission_flags.view_reports %}
+               <a href="{% url 'reports' %}" class="menu-item {% if request.resolver_match.url_name == 'reports' %}active{% endif %}">
+                   <i class="fas fa-chart-column"></i><span class="sidebar-text">Reports</span>
+               </a>
+               {% endif %}
+
+               {% if permission_flags.view_access_history %}
+               <a href="{% url 'login_history' %}" class="menu-item {% if request.resolver_match.url_name == 'login_history' %}active{% endif %}">
+                   <i class="fas fa-clock-rotate-left"></i><span class="sidebar-text">Login History</span>
+               </a>
+               {% endif %}
+                {% if permission_flags.view_staff_directory %}
+                <a href="{% url 'staff' %}" class="menu-item {% if request.resolver_match.url_name == 'staff' or request.resolver_match.url_name == 'add_staff' or request.resolver_match.url_name == 'edit_staff' or request.resolver_match.url_name == 'delete_staff' %}active{% endif %}">
+                    <i class="fas fa-users"></i><span class="sidebar-text">Staff</span>
+                </a>
+                {% endif %}
+
+                {% if role == "Admin" %}
+                <a href="{% url 'role_permissions' %}" class="menu-item {% if request.resolver_match.url_name == 'role_permissions' %}active{% endif %}">
+                    <i class="fas fa-shield-halved"></i><span class="sidebar-text">Role Permissions</span>
+                </a>
+                {% endif %}
+
+                {% if role == "Admin" %}
+                <a href="{% url 'backup_restore_center' %}" class="menu-item {% if request.resolver_match.url_name == 'backup_restore_center' %}active{% endif %}">
+                    <i class="fas fa-database"></i><span class="sidebar-text">Backups</span>
+                </a>
+
+                <a href="{% url 'security_checklist' %}" class="menu-item {% if request.resolver_match.url_name == 'security_checklist' %}active{% endif %}">
+                    <i class="fas fa-list-check"></i><span class="sidebar-text">Security Checklist</span>
+                </a>
+
+                <a href="{% url 'it_admin_center' %}" class="menu-item {% if request.resolver_match.url_name == 'it_admin_center' %}active{% endif %}">
+                    <i class="fas fa-server"></i><span class="sidebar-text">IT Admin</span>
+                </a>
+                {% endif %}
+
+                <a href="{% url 'notifications' %}" class="menu-item {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}">
+                    <i class="fas fa-bell"></i>
+                    <span class="sidebar-text">Notifications</span>
+                    {% if unread_notifications_count > 0 %}
+                        <span class="menu-badge">{{ unread_notifications_count }}</span>
+                    {% endif %}
+                </a>
+
+                <a href="{% url 'settings' %}" class="menu-item {% if request.resolver_match.url_name == 'settings' %}active{% endif %}">
+                    <i class="fas fa-gear"></i><span class="sidebar-text">Settings</span>
+                </a>
+            </nav>
+
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <h1>{% block page_title %}PPBMED Dashboard{% endblock %}</h1>
+                    <p>{% block page_subtitle %}{{ page_subtitle|default:"Track and manage official documents." }}{% endblock %}</p>
+                </div>
+
+                <div class="topbar-right">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search documents...">
+                    </div>
+
+                    <div class="top-icons">
+                        <a href="{% url 'notifications' %}" class="icon-btn bell-btn">
+                            <i class="fas fa-bell"></i>
+                            {% if unread_notifications_count > 0 %}
+                                <span class="bell-badge">{{ unread_notifications_count }}</span>
+                            {% endif %}
+                        </a>
+                    </div>
+
+                    <div class="account-menu" id="accountMenu">
+                        <button class="profile-btn" id="accountMenuButton" type="button" aria-haspopup="true" aria-expanded="false">
+                            <i class="fas fa-user-circle"></i>
+                            <span>{% if staff_user %}{{ staff_user.role }}{% else %}Account{% endif %}</span>
+                            <i class="fas fa-chevron-down account-caret"></i>
+                        </button>
+
+                        <div class="account-dropdown" id="accountDropdown" hidden>
+                            <div class="account-dropdown-header">
+                                <strong>{% if staff_user %}{{ staff_user.full_name }}{% else %}Guest{% endif %}</strong>
+                                <span>{% if staff_user %}{{ staff_user.role }}{% else %}General{% endif %}</span>
+                            </div>
+
+                            <div class="account-dropdown-links">
+                                {% if permission_flags.view_documents %}
+                                <a href="{% url 'documents' %}" class="account-dropdown-link">
+                                    <i class="fas fa-folder-open"></i>
+                                    <span>Documents</span>
+                                </a>
+                                {% endif %}
+
+                                {% if permission_flags.view_tracking %}
+                                <a href="{% url 'tracking' %}" class="account-dropdown-link">
+                                    <i class="fas fa-route"></i>
+                                    <span>Tracking</span>
+                                </a>
+                                {% endif %}
+
+                                {% if permission_flags.view_messages %}
+                                <a href="{% url 'messages' %}" class="account-dropdown-link">
+                                    <i class="fas fa-envelope"></i>
+                                    <span>Messages{% if unread_messages_count > 0 %} ({{ unread_messages_count }}){% endif %}</span>
+                                </a>
+                                {% endif %}
+
+                                <a href="{% url 'notifications' %}" class="account-dropdown-link">
+                                    <i class="fas fa-bell"></i>
+                                    <span>Notifications</span>
+                                </a>
+
+                                <a href="{% url 'settings' %}" class="account-dropdown-link">
+                                    <i class="fas fa-gear"></i>
+                                    <span>Settings</span>
+                                </a>
+
+                                {% if permission_flags.view_incoming %}
+                                <a href="{% url 'incoming' %}" class="account-dropdown-link">
+                                    <i class="fas fa-inbox"></i>
+                                    <span>Incoming</span>
+                                </a>
+                                {% endif %}
+
+                                {% if permission_flags.view_outgoing %}
+                                <a href="{% url 'outgoing' %}" class="account-dropdown-link">
+                                    <i class="fas fa-paper-plane"></i>
+                                    <span>Outgoing</span>
+                                </a>
+                                {% endif %}
+
+                                {% if permission_flags.view_reports %}
+                                <a href="{% url 'reports' %}" class="account-dropdown-link">
+                                    <i class="fas fa-chart-column"></i>
+                                    <span>Reports</span>
+                                </a>
+                                {% endif %}
+
+                                {% if permission_flags.view_access_history %}
+                                <a href="{% url 'login_history' %}" class="account-dropdown-link">
+                                    <i class="fas fa-clock-rotate-left"></i>
+                                    <span>Login History</span>
+                                </a>
+                                {% endif %}
+
+                                {% if permission_flags.view_staff_directory %}
+                                <a href="{% url 'staff' %}" class="account-dropdown-link">
+                                    <i class="fas fa-users"></i>
+                                    <span>Staff</span>
+                                </a>
+                                {% endif %}
+
+                                {% if role == "Admin" %}
+                                <a href="{% url 'role_permissions' %}" class="account-dropdown-link">
+                                    <i class="fas fa-shield-halved"></i>
+                                    <span>Role Permissions</span>
+                                </a>
+                                {% endif %}
+
+                                {% if role == "Admin" %}
+                                <a href="{% url 'backup_restore_center' %}" class="account-dropdown-link">
+                                    <i class="fas fa-database"></i>
+                                    <span>Backups</span>
+                                </a>
+
+                                <a href="{% url 'security_checklist' %}" class="account-dropdown-link">
+                                    <i class="fas fa-list-check"></i>
+                                    <span>Security Checklist</span>
+                                </a>
+
+                                <a href="{% url 'it_admin_center' %}" class="account-dropdown-link">
+                                    <i class="fas fa-server"></i>
+                                    <span>IT Admin</span>
+                                </a>
+                                {% endif %}
+
+                                <form method="post" action="{% url 'logout' %}" class="account-logout-form">
+                                    {% csrf_token %}
+                                    <button type="submit" class="account-dropdown-link account-logout-btn">
+                                        <i class="fas fa-right-from-bracket"></i>
+                                        <span>Logout</span>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            {% if messages %}
+            <div class="flash-messages-wrap" id="flashMessagesWrap">
+                {% for message in messages %}
+                <div class="flash-message flash-{{ message.tags|default:'success' }}">
+                    <div class="flash-message-icon">
+                        {% if 'success' in message.tags %}
+                            <i class="fas fa-circle-check"></i>
+                        {% elif 'error' in message.tags %}
+                            <i class="fas fa-circle-xmark"></i>
+                        {% elif 'warning' in message.tags %}
+                            <i class="fas fa-triangle-exclamation"></i>
+                        {% else %}
+                            <i class="fas fa-circle-info"></i>
+                        {% endif %}
+                    </div>
+                    <div class="flash-message-text">{{ message }}</div>
+                    <button class="flash-message-close" onclick="closeFlashMessage(this)">&times;</button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% if unread_notifications_count > 0 %}
+            <div class="notification-toast" id="notificationToast">
+                <div class="notification-toast-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="notification-toast-text">
+                    You have {{ unread_notifications_count }} unread notification{{ unread_notifications_count|pluralize }}.
+                </div>
+                <button class="notification-toast-close" onclick="closeNotificationToast()">&times;</button>
+            </div>
+            {% endif %}
+
+            <div
+                id="notification-config"
+                data-unread-count="{{ unread_notifications_count|default:'0' }}"
+                data-sound-alerts="{% if staff_user and staff_user.preferences %}{{ staff_user.preferences.sound_alerts|yesno:'true,false' }}{% else %}true{% endif %}"
+                style="display: none;"
+            ></div>
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+
+    <script>
+        function closeNotificationToast() {
+            const toast = document.getElementById('notificationToast');
+            if (toast) {
+                toast.style.transition = 'opacity 0.25s ease, transform 0.25s ease';
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    toast.style.display = 'none';
+                }, 250);
+            }
+        }
+
+        function closeFlashMessage(button) {
+            const message = button.closest('.flash-message');
+            if (message) {
+                message.style.opacity = '0';
+                message.style.transform = 'translateY(-10px)';
+                setTimeout(() => {
+                    message.remove();
+                }, 250);
+            }
+        }
+
+        function autoDismissFlashMessages() {
+            const messages = document.querySelectorAll('.flash-message');
+            messages.forEach((message, index) => {
+                setTimeout(() => {
+                    if (message && message.parentNode) {
+                        message.style.opacity = '0';
+                        message.style.transform = 'translateY(-10px)';
+                        setTimeout(() => {
+                            if (message && message.parentNode) {
+                                message.remove();
+                            }
+                        }, 250);
+                    }
+                }, 3500 + (index * 300));
+            });
+        }
+
+        function playNotificationBeep() {
+            try {
+                const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextClass) return;
+
+                const audioContext = new AudioContextClass();
+                const oscillator = audioContext.createOscillator();
+                const gainNode = audioContext.createGain();
+
+                oscillator.type = 'sine';
+                oscillator.frequency.setValueAtTime(880, audioContext.currentTime);
+
+                gainNode.gain.setValueAtTime(0.001, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.15, audioContext.currentTime + 0.01);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.25);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                oscillator.start(audioContext.currentTime);
+                oscillator.stop(audioContext.currentTime + 0.25);
+            } catch (e) {
+                console.log('Notification sound could not play.');
+            }
+        }
+
+        function animateCounter(element, target) {
+            const finalValue = Number(target || 0);
+            const duration = 900;
+            const startTime = performance.now();
+
+            function updateCounter(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const currentValue = Math.round(finalValue * eased);
+
+                element.textContent = currentValue;
+
+                if (progress < 1) {
+                    requestAnimationFrame(updateCounter);
+                } else {
+                    element.textContent = finalValue;
+                }
+            }
+
+            requestAnimationFrame(updateCounter);
+        }
+
+        function initDashboardCounters() {
+            const counters = document.querySelectorAll('.count-up');
+            counters.forEach(counter => {
+                const target = counter.dataset.target || counter.textContent.trim();
+                counter.textContent = '0';
+                animateCounter(counter, target);
+            });
+        }
+
+        function initSidebarToggle() {
+            const toggle = document.getElementById('sidebarToggle');
+            const container = document.getElementById('dashboardContainer');
+
+            if (!toggle || !container) return;
+
+            const savedState = localStorage.getItem('ppbmed_sidebar_collapsed');
+            if (savedState === 'true') {
+                container.classList.add('sidebar-collapsed');
+            }
+
+            toggle.addEventListener('click', function () {
+                container.classList.toggle('sidebar-collapsed');
+                localStorage.setItem(
+                    'ppbmed_sidebar_collapsed',
+                    container.classList.contains('sidebar-collapsed') ? 'true' : 'false'
+                );
+            });
+        }
+
+        function initAccountMenu() {
+            const menu = document.getElementById('accountMenu');
+            const button = document.getElementById('accountMenuButton');
+            const dropdown = document.getElementById('accountDropdown');
+
+            if (!menu || !button || !dropdown) return;
+
+            function closeMenu() {
+                dropdown.hidden = true;
+                button.setAttribute('aria-expanded', 'false');
+                menu.classList.remove('is-open');
+            }
+
+            button.addEventListener('click', function () {
+                const isOpen = !dropdown.hidden;
+                dropdown.hidden = isOpen;
+                button.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
+                menu.classList.toggle('is-open', !isOpen);
+            });
+
+            document.addEventListener('click', function (event) {
+                if (!menu.contains(event.target)) {
+                    closeMenu();
+                }
+            });
+
+            document.addEventListener('keydown', function (event) {
+                if (event.key === 'Escape') {
+                    closeMenu();
+                }
+            });
+        }
+
+        function initFormLoading() {
+            const forms = document.querySelectorAll('form');
+
+            forms.forEach(form => {
+                form.addEventListener('submit', function () {
+                    const submitButtons = form.querySelectorAll('button[type="submit"]');
+
+                    submitButtons.forEach(button => {
+                        if (button.dataset.loadingApplied === 'true') return;
+
+                        button.dataset.originalHtml = button.innerHTML;
+                        button.dataset.loadingApplied = 'true';
+                        button.disabled = true;
+                        button.innerHTML = '<span class="btn-spinner"></span><span>Saving...</span>';
+                        button.classList.add('is-loading');
+                    });
+                });
+            });
+        }
+
+        function initCustomFileInputs() {
+            const fileInputs = document.querySelectorAll('input[type="file"].form-control');
+
+            fileInputs.forEach(input => {
+                if (input.dataset.customizedFileInput === 'true') return;
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'custom-file-field';
+
+                input.parentNode.insertBefore(wrapper, input);
+                wrapper.appendChild(input);
+
+                const trigger = document.createElement('label');
+                trigger.className = 'custom-file-trigger';
+                trigger.setAttribute('for', input.id);
+
+                const button = document.createElement('span');
+                button.className = 'custom-file-button';
+                button.textContent = 'Choose file';
+
+                const name = document.createElement('span');
+                name.className = 'custom-file-name';
+                name.textContent = input.files && input.files.length ? input.files[0].name : 'No file chosen';
+
+                trigger.appendChild(button);
+                trigger.appendChild(name);
+                wrapper.appendChild(trigger);
+
+                input.addEventListener('change', function () {
+                    name.textContent = input.files && input.files.length ? input.files[0].name : 'No file chosen';
+                });
+
+                input.dataset.customizedFileInput = 'true';
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const configEl = document.getElementById('notification-config');
+            if (configEl) {
+                const unreadCount = Number(configEl.dataset.unreadCount || '0');
+                const soundAlertsEnabled = (configEl.dataset.soundAlerts || 'true') === 'true';
+                const lastUnreadCount = parseInt(localStorage.getItem('ppbmed_last_unread_count') || '0', 10);
+
+                if (unreadCount > 0 && unreadCount > lastUnreadCount && soundAlertsEnabled) {
+                    playNotificationBeep();
+                }
+
+                localStorage.setItem('ppbmed_last_unread_count', String(unreadCount));
+            }
+
+            initSidebarToggle();
+            initAccountMenu();
+            initDashboardCounters();
+            initFormLoading();
+            initCustomFileInputs();
+            autoDismissFlashMessages();
+        });
+    </script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

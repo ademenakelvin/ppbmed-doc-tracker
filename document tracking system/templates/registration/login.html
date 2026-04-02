@@ -1,0 +1,157 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | PPBMED</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'coreapp/css/login.css' %}?v=20260331a">
+</head>
+<body>
+    <main class="login-shell">
+        <div class="login-background"></div>
+        <div class="login-overlay"></div>
+
+        <div class="floating-orb orb-one"></div>
+        <div class="floating-orb orb-two"></div>
+        <div class="floating-orb orb-three"></div>
+
+        <section class="login-layout">
+            <aside class="login-showcase animate-rise delay-1">
+                <div class="showcase-badge">
+                    <i class="fas fa-landmark"></i>
+                    <span>Ministry of the Interior</span>
+                </div>
+
+                <h1 class="showcase-title">Secure sign-in for the PPBMED workspace</h1>
+
+                <p class="showcase-copy">
+                    Use your staff account to continue.
+                </p>
+
+                <div class="showcase-metrics">
+                    <div class="metric-card">
+                        <span class="metric-value">Routing</span>
+                        <span class="metric-label">live updates</span>
+                    </div>
+                    <div class="metric-card">
+                        <span class="metric-value">Audit</span>
+                        <span class="metric-label">tracked activity</span>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="login-panel animate-rise delay-2" aria-label="Login form">
+                <div class="login-card">
+                    <div class="login-card-glow"></div>
+
+                    <div class="brand-block">
+                        <div class="brand-mark">P</div>
+                        <div>
+                            <p class="brand-kicker">PPBMED Portal</p>
+                            <h2>Welcome back</h2>
+                        </div>
+                    </div>
+
+                    <p class="login-intro">Sign in with your staff account.</p>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="message-box {% if 'error' in message.tags %}message-box-error{% elif 'warning' in message.tags %}message-box-warning{% else %}message-box-success{% endif %}" role="alert">
+                                <i class="fas {% if 'error' in message.tags %}fa-circle-exclamation{% elif 'warning' in message.tags %}fa-lock{% else %}fa-circle-info{% endif %}"></i>
+                                <span>{{ message }}</span>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if form.non_field_errors %}
+                        <div class="message-box message-box-error" role="alert">
+                            <i class="fas fa-circle-exclamation"></i>
+                            <span>{{ form.non_field_errors|striptags }}</span>
+                        </div>
+                    {% elif form.errors %}
+                        <div class="message-box message-box-error" role="alert">
+                            <i class="fas fa-circle-exclamation"></i>
+                            <span>Invalid username or password.</span>
+                        </div>
+                    {% endif %}
+
+                    {% if next and user.is_authenticated %}
+                        <div class="message-box message-box-warning" role="alert">
+                            <i class="fas fa-lock"></i>
+                            <span>Your account does not have access to that page.</span>
+                        </div>
+                    {% endif %}
+
+                    <form method="post" class="login-form">
+                        {% csrf_token %}
+
+                        <div class="form-group">
+                            <label for="id_username">Username</label>
+                            <div class="input-wrap">
+                                <i class="fas fa-user"></i>
+                                <input type="text" name="username" id="id_username" value="{{ form.username.value|default:'' }}" autocomplete="username" autofocus required>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="label-row">
+                                <label for="id_password">Password</label>
+                                <span class="field-tip">Case-sensitive</span>
+                            </div>
+                            <div class="input-wrap input-wrap-password">
+                                <i class="fas fa-key"></i>
+                                <input type="password" name="password" id="id_password" autocomplete="current-password" required>
+                                <button type="button" class="password-toggle" id="password-toggle" aria-label="Show password" aria-pressed="false">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="login-btn">
+                            <span>Sign In</span>
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+
+                        {% if next %}
+                            <input type="hidden" name="next" value="{{ next }}">
+                        {% endif %}
+                    </form>
+
+                    <div class="login-footer">
+                        <div class="footer-item">
+                            <i class="fas fa-id-badge"></i>
+                            <span>Your login email should match the staff email in PPBMED.</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        (function () {
+            const toggleButton = document.getElementById("password-toggle");
+            const passwordInput = document.getElementById("id_password");
+
+            if (!toggleButton || !passwordInput) {
+                return;
+            }
+
+            toggleButton.addEventListener("click", function () {
+                const isPassword = passwordInput.type === "password";
+                passwordInput.type = isPassword ? "text" : "password";
+                toggleButton.setAttribute("aria-pressed", String(isPassword));
+                toggleButton.setAttribute("aria-label", isPassword ? "Hide password" : "Show password");
+                toggleButton.innerHTML = isPassword
+                    ? '<i class="fas fa-eye-slash"></i>'
+                    : '<i class="fas fa-eye"></i>';
+            });
+        }());
+    </script>
+</body>
+</html>

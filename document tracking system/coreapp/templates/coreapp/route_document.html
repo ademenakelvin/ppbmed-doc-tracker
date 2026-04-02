@@ -1,0 +1,94 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Route Document | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/route-document.css' %}?v=20260330c">{% endblock %}
+{% block page_title %}Route Document{% endblock %}
+{% block page_subtitle %}Send this document to the next step.{% endblock %}
+
+{% block content %}
+<section class="route-hero">
+    <div class="route-hero-copy">
+        <div class="route-badge">
+            <i class="fas fa-route"></i>
+            <span>Routing control</span>
+        </div>
+        <h2>Route {{ document.reference_id }}.</h2>
+        <p>Assign, forward, return, or complete it with a clear note.</p>
+    </div>
+    <div class="route-hero-stats">
+        <div class="route-stat-card">
+            <span class="route-stat-label">Document</span>
+            <strong>{{ document.reference_id }}</strong>
+            <p>{{ document.subject }}</p>
+        </div>
+        <div class="route-stat-card subtle">
+            <span class="route-stat-label">Current status</span>
+            <strong>{{ document.status }}</strong>
+            <p>Priority: {{ document.priority }}</p>
+        </div>
+    </div>
+</section>
+
+<div class="card route-card">
+    <div class="card-header route-header">
+        <div>
+            <h2>Route {{ document.reference_id }}</h2>
+            <p>Choose the officers, action, and note.</p>
+        </div>
+        <a href="{% url 'document_detail' document.pk %}" class="route-back-link">Back to detail</a>
+    </div>
+
+    <div class="panel-body">
+        {% if form.non_field_errors %}
+            <div class="route-alert">
+                {% for error in form.non_field_errors %}
+                    <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" class="document-form route-form">
+            {% csrf_token %}
+
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.from_officer.id_for_label }}">From Officer</label>
+                    {{ form.from_officer }}
+                    {% if form.from_officer.errors %}<small class="field-error">{{ form.from_officer.errors|striptags }}</small>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.to_officer.id_for_label }}">To Officer</label>
+                    {{ form.to_officer }}
+                    {% if form.to_officer.errors %}<small class="field-error">{{ form.to_officer.errors|striptags }}</small>{% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="{{ form.action.id_for_label }}">Action</label>
+                    {{ form.action }}
+                    {% if form.action.errors %}<small class="field-error">{{ form.action.errors|striptags }}</small>{% endif %}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.note.id_for_label }}">Note / Instruction</label>
+                    {{ form.note }}
+                    {% if form.note.errors %}<small class="field-error">{{ form.note.errors|striptags }}</small>{% endif %}
+                </div>
+
+                <div class="form-group full-width">
+                    <label for="{{ form.attachment.id_for_label }}">Attachment</label>
+                    {{ form.attachment }}
+                    <small class="field-hint">Attach supporting feedback when needed.</small>
+                    {% if form.attachment.errors %}<small class="field-error">{{ form.attachment.errors|striptags }}</small>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-actions route-actions">
+                <a href="{% url 'document_detail' document.pk %}" class="route-cancel-link">Cancel</a>
+                <button type="submit" class="save-btn route-save-btn">Save Routing</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

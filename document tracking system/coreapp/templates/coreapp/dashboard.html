@@ -1,0 +1,978 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/dashboard-home.css' %}">{% endblock %}
+{% block page_title %}PPBMED Dashboard{% endblock %}
+{% block page_subtitle %}{{ page_subtitle|default:"Overview of documents, routing, and action items." }}{% endblock %}
+
+{% block content %}
+<section class="dashboard-hero">
+    <div class="dashboard-hero-copy">
+        <div class="dashboard-hero-badge">
+            <i class="fas fa-signal"></i>
+            <span>{{ dashboard_type|title }} workspace</span>
+        </div>
+
+        <h2>
+            {% if staff_user %}
+                Welcome back, {{ staff_user.full_name }}.
+            {% else %}
+                Welcome to your document command center.
+            {% endif %}
+        </h2>
+
+        <p>
+            {% if dashboard_type == "admin" %}
+                Review staff access, backups, security, and system health from one workspace.
+            {% else %}
+                Check document movement, pending work, and deadlines from one workspace.
+            {% endif %}
+        </p>
+
+        <div class="dashboard-hero-actions">
+            {% if dashboard_type == "admin" %}
+            <a href="{% url 'role_permissions' %}" class="hero-action-btn primary">
+                <i class="fas fa-shield-halved"></i>
+                <span>Role Permissions</span>
+            </a>
+            <a href="{% url 'security_checklist' %}" class="hero-action-btn secondary">
+                <i class="fas fa-list-check"></i>
+                <span>Security Checklist</span>
+            </a>
+            {% elif permission_flags.view_tracking %}
+            <a href="{% url 'tracking' %}" class="hero-action-btn primary">
+                <i class="fas fa-route"></i>
+                <span>Open Tracking</span>
+            </a>
+            {% endif %}
+
+            {% if dashboard_type == "admin" %}
+            <a href="{% url 'it_admin_center' %}" class="hero-action-btn secondary">
+                <i class="fas fa-server"></i>
+                <span>IT Admin</span>
+            </a>
+            {% elif permission_flags.add_document %}
+            <a href="{% url 'add_document' %}" class="hero-action-btn secondary">
+                <i class="fas fa-file-circle-plus"></i>
+                <span>New Document</span>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="dashboard-hero-panel">
+        <div class="hero-panel-card">
+            <span class="hero-panel-label">Due now</span>
+            <strong>{{ card_4_value }}</strong>
+            <p>
+                {% if dashboard_type == "admin" %}
+                    security or control items need attention.
+                {% else %}
+                    documents need attention.
+                {% endif %}
+            </p>
+        </div>
+        <div class="hero-panel-card subtle">
+            <span class="hero-panel-label">Role</span>
+            <strong>{% if staff_user %}{{ staff_user.role }}{% else %}General{% endif %}</strong>
+            <p>{{ page_subtitle|default:"Overview of documents, routing, and action items." }}</p>
+        </div>
+    </div>
+</section>
+
+<section class="stats-grid">
+    {% if dashboard_type == "admin" %}
+    <a href="{{ admin_stat_links.card_1 }}" class="stat-card blue dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-folder"></i>
+            </div>
+            <span class="stat-trend">Live</span>
+        </div>
+        <div class="stat-copy">
+            <h3 class="count-up" data-target="{{ card_1_value }}">{{ card_1_value }}</h3>
+            <p>{{ card_1_title }}</p>
+        </div>
+    </a>
+
+    <a href="{{ admin_stat_links.card_2 }}" class="stat-card orange dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <span class="stat-trend">Focus</span>
+        </div>
+        <div class="stat-copy">
+            <h3 class="count-up" data-target="{{ card_2_value }}">{{ card_2_value }}</h3>
+            <p>{{ card_2_title }}</p>
+        </div>
+    </a>
+
+    <a href="{{ admin_stat_links.card_3 }}" class="stat-card green dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <span class="stat-trend">Done</span>
+        </div>
+        <div class="stat-copy">
+            <h3 class="count-up" data-target="{{ card_3_value }}">{{ card_3_value }}</h3>
+            <p>{{ card_3_title }}</p>
+        </div>
+    </a>
+
+    <a href="{{ admin_stat_links.card_4 }}" class="stat-card red dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <span class="stat-trend">Alert</span>
+        </div>
+        <div class="stat-copy">
+            <h3 class="count-up" data-target="{{ card_4_value }}">{{ card_4_value }}</h3>
+            <p>{{ card_4_title }}</p>
+        </div>
+    </a>
+    {% elif dashboard_type == "director" %}
+    <a href="{{ director_stat_links.card_1 }}" class="stat-card blue dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-folder"></i></div><span class="stat-trend">Live</span></div>
+        <div class="stat-copy"><h3 class="count-up" data-target="{{ card_1_value }}">{{ card_1_value }}</h3><p>{{ card_1_title }}</p></div>
+    </a>
+    <a href="{{ director_stat_links.card_2 }}" class="stat-card orange dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-hourglass-half"></i></div><span class="stat-trend">Review</span></div>
+        <div class="stat-copy"><h3 class="count-up" data-target="{{ card_2_value }}">{{ card_2_value }}</h3><p>{{ card_2_title }}</p></div>
+    </a>
+    <a href="{{ director_stat_links.card_3 }}" class="stat-card green dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><span class="stat-trend">Done</span></div>
+        <div class="stat-copy"><h3 class="count-up" data-target="{{ card_3_value }}">{{ card_3_value }}</h3><p>{{ card_3_title }}</p></div>
+    </a>
+    <a href="{{ director_stat_links.card_4 }}" class="stat-card red dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-triangle-exclamation"></i></div><span class="stat-trend">Alert</span></div>
+        <div class="stat-copy"><h3 class="count-up" data-target="{{ card_4_value }}">{{ card_4_value }}</h3><p>{{ card_4_title }}</p></div>
+    </a>
+    {% elif dashboard_type == "deputy" %}
+    <a href="{{ deputy_stat_links.card_1 }}" class="stat-card blue dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-user-check"></i></div><span class="stat-trend">Assigned</span></div>
+        <div class="stat-copy"><h3 class="count-up" data-target="{{ card_1_value }}">{{ card_1_value }}</h3><p>{{ card_1_title }}</p></div>
+    </a>
+    <a href="{{ deputy_stat_links.card_2 }}" class="stat-card orange dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-list-check"></i></div><span class="stat-trend">Review</span></div>
+        <div class="stat-copy"><h3 class="count-up" data-target="{{ card_2_value }}">{{ card_2_value }}</h3><p>{{ card_2_title }}</p></div>
+    </a>
+    <a href="{{ deputy_stat_links.card_3 }}" class="stat-card green dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-check-circle"></i></div><span class="stat-trend">Done</span></div>
+        <div class="stat-copy"><h3 class="count-up" data-target="{{ card_3_value }}">{{ card_3_value }}</h3><p>{{ card_3_title }}</p></div>
+    </a>
+    <a href="{{ deputy_stat_links.card_4 }}" class="stat-card red dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-triangle-exclamation"></i></div><span class="stat-trend">Alert</span></div>
+        <div class="stat-copy"><h3 class="count-up" data-target="{{ card_4_value }}">{{ card_4_value }}</h3><p>{{ card_4_title }}</p></div>
+    </a>
+    {% else %}
+    <div class="stat-card blue dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-folder"></i>
+            </div>
+            <span class="stat-trend">Live</span>
+        </div>
+        <div class="stat-copy">
+            <h3 class="count-up" data-target="{{ card_1_value }}">{{ card_1_value }}</h3>
+            <p>{{ card_1_title }}</p>
+        </div>
+    </div>
+
+    <div class="stat-card orange dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <span class="stat-trend">Focus</span>
+        </div>
+        <div class="stat-copy">
+            <h3 class="count-up" data-target="{{ card_2_value }}">{{ card_2_value }}</h3>
+            <p>{{ card_2_title }}</p>
+        </div>
+    </div>
+
+    <div class="stat-card green dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <span class="stat-trend">Done</span>
+        </div>
+        <div class="stat-copy">
+            <h3 class="count-up" data-target="{{ card_3_value }}">{{ card_3_value }}</h3>
+            <p>{{ card_3_title }}</p>
+        </div>
+    </div>
+
+    <div class="stat-card red dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-circle"></i>
+            </div>
+            <span class="stat-trend">Alert</span>
+        </div>
+        <div class="stat-copy">
+            <h3 class="count-up" data-target="{{ card_4_value }}">{{ card_4_value }}</h3>
+            <p>{{ card_4_title }}</p>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<section class="stats-grid">
+    {% if dashboard_type == "admin" %}
+    <a href="{{ admin_stat_links.queue }}" class="stat-card orange dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-list-check"></i>
+            </div>
+            <span class="stat-trend">Queue</span>
+        </div>
+        <div class="stat-copy">
+            <h3>{{ dashboard_pending_actions_count }}</h3>
+            <p>Security Reviews</p>
+        </div>
+    </a>
+
+    <a href="{{ admin_stat_links.notices }}" class="stat-card blue dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <span class="stat-trend">Unread</span>
+        </div>
+        <div class="stat-copy">
+            <h3>{{ dashboard_unread_notifications_count }}</h3>
+            <p>Admin Notices</p>
+        </div>
+    </a>
+
+    <a href="{{ admin_stat_links.gaps }}" class="stat-card red dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-user-clock"></i>
+            </div>
+            <span class="stat-trend">Gaps</span>
+        </div>
+        <div class="stat-copy">
+            <h3>{{ dashboard_unassigned_count }}</h3>
+            <p>Backup Gaps</p>
+        </div>
+    </a>
+    {% elif dashboard_type == "director" %}
+    <a href="{{ director_stat_links.queue }}" class="stat-card orange dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-route"></i></div><span class="stat-trend">Flow</span></div>
+        <div class="stat-copy"><h3>{{ dashboard_pending_actions_count }}</h3><p>Pending Actions</p></div>
+    </a>
+    <a href="{{ director_stat_links.notices }}" class="stat-card blue dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-bell"></i></div><span class="stat-trend">Unread</span></div>
+        <div class="stat-copy"><h3>{{ dashboard_unread_notifications_count }}</h3><p>Director Notices</p></div>
+    </a>
+    <a href="{{ director_stat_links.gaps }}" class="stat-card red dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-layer-group"></i></div><span class="stat-trend">Watch</span></div>
+        <div class="stat-copy"><h3>{{ dashboard_unassigned_count }}</h3><p>Unassigned Documents</p></div>
+    </a>
+    {% elif dashboard_type == "deputy" %}
+    <a href="{{ deputy_stat_links.queue }}" class="stat-card orange dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-route"></i></div><span class="stat-trend">Queue</span></div>
+        <div class="stat-copy"><h3>{{ dashboard_pending_actions_count }}</h3><p>Pending Actions</p></div>
+    </a>
+    <a href="{{ deputy_stat_links.notices }}" class="stat-card blue dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-bell"></i></div><span class="stat-trend">Unread</span></div>
+        <div class="stat-copy"><h3>{{ dashboard_unread_notifications_count }}</h3><p>Deputy Notices</p></div>
+    </a>
+    <a href="{{ deputy_stat_links.gaps }}" class="stat-card red dashboard-stat-card">
+        <div class="stat-card-top"><div class="stat-icon"><i class="fas fa-user-clock"></i></div><span class="stat-trend">Gaps</span></div>
+        <div class="stat-copy"><h3>{{ dashboard_unassigned_count }}</h3><p>Unassigned Documents</p></div>
+    </a>
+    {% else %}
+    <div class="stat-card orange dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-list-check"></i>
+            </div>
+            <span class="stat-trend">Queue</span>
+        </div>
+        <div class="stat-copy">
+            <h3>{{ dashboard_pending_actions_count }}</h3>
+            <p>{% if dashboard_type == "admin" %}Security Reviews{% else %}Pending Actions{% endif %}</p>
+        </div>
+    </div>
+
+    <div class="stat-card blue dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-bell"></i>
+            </div>
+            <span class="stat-trend">Unread</span>
+        </div>
+        <div class="stat-copy">
+            <h3>{{ dashboard_unread_notifications_count }}</h3>
+            <p>{% if dashboard_type == "admin" %}Admin Notices{% else %}Unread Notices{% endif %}</p>
+        </div>
+    </div>
+
+    <div class="stat-card red dashboard-stat-card">
+        <div class="stat-card-top">
+            <div class="stat-icon">
+                <i class="fas fa-user-clock"></i>
+            </div>
+            <span class="stat-trend">Gaps</span>
+        </div>
+        <div class="stat-copy">
+            <h3>{{ dashboard_unassigned_count }}</h3>
+            <p>{% if dashboard_type == "admin" %}Backup Gaps{% else %}Unassigned Documents{% endif %}</p>
+        </div>
+    </div>
+    {% endif %}
+</section>
+
+<section class="content-grid">
+    {% if dashboard_type == "admin" %}
+    <div class="card large-card dashboard-section-card">
+        <div class="card-header dashboard-section-header">
+            <h2>System Control Snapshot</h2>
+        </div>
+
+        <div class="panel-body">
+            {% for item in admin_quick_metrics %}
+            <a href="{{ item.url }}" class="notice-item">
+                <div class="notice-icon">
+                    <i class="{{ item.icon }}"></i>
+                </div>
+                <div class="notice-content">
+                    <strong>{{ item.title }}: {{ item.value }}</strong>
+                    <p>{{ item.detail }}</p>
+                </div>
+            </a>
+            {% endfor %}
+
+            <a href="{% url 'backup_restore_center' %}" class="notice-item">
+                <div class="notice-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <div class="notice-content">
+                    <strong>Latest Backup</strong>
+                    <p>{{ admin_latest_backup }} / {{ admin_backup_status }}</p>
+                </div>
+            </a>
+        </div>
+    </div>
+
+    <div class="side-panels">
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Admin Overview</h2>
+            </div>
+
+            <div class="panel-body">
+                <a href="{% url 'settings' %}" class="notice-item">
+                    <div class="notice-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="notice-content">
+                        <strong>Logged in as</strong>
+                        <p>{% if staff_user %}{{ staff_user.full_name }} - {{ staff_user.role }}{% endif %}</p>
+                    </div>
+                </a>
+
+                <a href="{% url 'role_permissions' %}" class="notice-item">
+                    <div class="notice-icon">
+                        <i class="fas fa-shield-halved"></i>
+                    </div>
+                    <div class="notice-content">
+                        <strong>Primary scope</strong>
+                        <p>Permissions, staff accounts, security monitoring, and maintenance oversight.</p>
+                    </div>
+                </a>
+
+                <a href="{% url 'backup_restore_center' %}" class="notice-item">
+                    <div class="notice-icon">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <div class="notice-content">
+                        <strong>Backup status</strong>
+                        <p>{{ admin_backup_status }} / {{ admin_latest_backup }}</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Quick Actions</h2>
+            </div>
+
+            <div class="quick-actions">
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon blue"><i class="fas fa-shield-halved"></i></div>
+                        <div>
+                            <h4>Role Permissions</h4>
+                            <p>Control who can access what</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'role_permissions' %}" class="action-link-btn">Open</a>
+                </div>
+
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon green"><i class="fas fa-users"></i></div>
+                        <div>
+                            <h4>Staff Accounts</h4>
+                            <p>Manage staff records and access</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'staff' %}" class="action-link-btn">Open</a>
+                </div>
+
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon cyan"><i class="fas fa-clock-rotate-left"></i></div>
+                        <div>
+                            <h4>Login History</h4>
+                            <p>Review audit and sign-in activity</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'login_history' %}" class="action-link-btn">Open</a>
+                </div>
+
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon orange"><i class="fas fa-server"></i></div>
+                        <div>
+                            <h4>IT Admin</h4>
+                            <p>Update maintenance and technical notes</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'it_admin_center' %}" class="action-link-btn">Open</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card large-card dashboard-section-card">
+        <div class="card-header dashboard-section-header">
+            <h2>
+                {% if dashboard_type == "staff" %}
+                    My Recent Documents
+                {% elif dashboard_type == "deputy" %}
+                    Supervised Documents
+                {% elif dashboard_type == "director" %}
+                    Latest Directorate Documents
+                {% else %}
+                    Recent Documents
+                {% endif %}
+            </h2>
+            {% if permission_flags.view_documents %}
+            <a href="{% url 'documents' %}" class="section-link">
+                <span>View all</span>
+                <i class="fas fa-arrow-right"></i>
+            </a>
+            {% endif %}
+        </div>
+
+        <div class="table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Reference ID</th>
+                        <th>Subject</th>
+                        <th>Assigned To</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Date Received</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if recent_documents %}
+                        {% for doc in recent_documents %}
+                        <tr>
+                            <td>
+                                <div class="doc-reference">{{ doc.reference_id }}</div>
+                            </td>
+                            <td>
+                                <div class="doc-subject">{{ doc.subject }}</div>
+                                <div class="doc-meta">{{ doc.origin }} to {{ doc.destination }}</div>
+                            </td>
+                            <td>{% if doc.assigned_to %}{{ doc.assigned_to.full_name }}{% else %}-{% endif %}</td>
+                            <td>
+                                <span class="priority-badge priority-{{ doc.priority|lower }}">{{ doc.priority }}</span>
+                            </td>
+                            <td>
+                                <span class="status-badge {% if doc.status == 'Completed' %}status-completed{% elif doc.status == 'Pending' %}status-pending{% elif doc.status == 'In Progress' %}status-progress{% else %}status-overdue{% endif %}">
+                                    {{ doc.status }}
+                                </span>
+                            </td>
+                            <td>{{ doc.date_received|date:"M d, Y" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="empty-row">No documents available yet.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="side-panels">
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Role Overview</h2>
+            </div>
+
+            <div class="panel-body">
+                {% if dashboard_type == "director" and director_overview_items %}
+                    {% for item in director_overview_items %}
+                    <a href="{{ item.url }}" class="notice-item">
+                        <div class="notice-icon">
+                            <i class="{{ item.icon }}"></i>
+                        </div>
+                        <div class="notice-content">
+                            <strong>{{ item.title }}</strong>
+                            <p>{{ item.detail }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% elif dashboard_type == "deputy" and deputy_overview_items %}
+                    {% for item in deputy_overview_items %}
+                    <a href="{{ item.url }}" class="notice-item">
+                        <div class="notice-icon">
+                            <i class="{{ item.icon }}"></i>
+                        </div>
+                        <div class="notice-content">
+                            <strong>{{ item.title }}</strong>
+                            <p>{{ item.detail }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                <div class="notice-item">
+                    <div class="notice-icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                    <div class="notice-content">
+                        <strong>Logged in as</strong>
+                        <p>
+                            {% if staff_user %}
+                                {{ staff_user.full_name }} - {{ staff_user.role }}
+                            {% else %}
+                                General View
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="notice-item">
+                    <div class="notice-icon">
+                        <i class="fas fa-layer-group"></i>
+                    </div>
+                    <div class="notice-content">
+                        <strong>Dashboard Type</strong>
+                        <p>{{ dashboard_type|title }}</p>
+                    </div>
+                </div>
+
+                <div class="notice-item">
+                    <div class="notice-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <div class="notice-content">
+                        <strong>Priority snapshot</strong>
+                        <p>{{ card_2_value }} active item{{ card_2_value|pluralize }} currently need attention.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Quick Actions</h2>
+            </div>
+
+            <div class="quick-actions">
+                {% if role == "Director" %}
+                {% if permission_flags.add_document %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon blue"><i class="fas fa-file-circle-plus"></i></div>
+                        <div>
+                            <h4>Create Document</h4>
+                            <p>Add new official document</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'add_document' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+
+                {% if permission_flags.view_staff_directory %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon green"><i class="fas fa-users"></i></div>
+                        <div>
+                            <h4>Manage Staff</h4>
+                            <p>View and manage staff list</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'staff' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+                {% elif role == "Deputy Director" %}
+                {% if permission_flags.view_incoming %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon blue"><i class="fas fa-inbox"></i></div>
+                        <div>
+                            <h4>Incoming</h4>
+                            <p>Review incoming documents</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'incoming' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+
+                {% if permission_flags.view_tracking %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon cyan"><i class="fas fa-arrows-rotate"></i></div>
+                        <div>
+                            <h4>Tracking</h4>
+                            <p>Monitor document movement</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'tracking' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+
+                {% if permission_flags.view_reports %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon green"><i class="fas fa-chart-column"></i></div>
+                        <div>
+                            <h4>Reports</h4>
+                            <p>Review directorate analytics</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'reports' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+
+                {% if permission_flags.view_staff_directory %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon blue"><i class="fas fa-users"></i></div>
+                        <div>
+                            <h4>Staff Directory</h4>
+                            <p>View staff in your department</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'staff' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+                {% if permission_flags.view_access_history %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon orange"><i class="fas fa-clock-rotate-left"></i></div>
+                        <div>
+                            <h4>Access History</h4>
+                            <p>Review department auth activity</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'login_history' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+                {% else %}
+                {% if permission_flags.view_documents %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon green"><i class="fas fa-folder-open"></i></div>
+                        <div>
+                            <h4>My Documents</h4>
+                            <p>Check assigned work</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'documents' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+
+                {% if permission_flags.view_tracking %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon cyan"><i class="fas fa-route"></i></div>
+                        <div>
+                            <h4>Tracking</h4>
+                            <p>View routing updates</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'tracking' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+
+                {% if permission_flags.view_incoming %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon blue"><i class="fas fa-inbox"></i></div>
+                        <div>
+                            <h4>Incoming</h4>
+                            <p>Read incoming documents</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'incoming' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+
+                {% if permission_flags.view_outgoing %}
+                <div class="action-box">
+                    <div class="action-left">
+                        <div class="action-icon orange"><i class="fas fa-paper-plane"></i></div>
+                        <div>
+                            <h4>Outgoing</h4>
+                            <p>Read outgoing documents</p>
+                        </div>
+                    </div>
+                    <a href="{% url 'outgoing' %}" class="action-link-btn">Open</a>
+                </div>
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        {% if recent_personal_activity %}
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>My Activity</h2>
+            </div>
+
+            <div class="panel-body">
+                {% for item in recent_personal_activity %}
+                <div class="notice-item">
+                    <div class="notice-icon">
+                        <i class="fas fa-clock-rotate-left"></i>
+                    </div>
+                    <div class="notice-content">
+                        <strong>{{ item.title }}</strong>
+                        <p>{{ item.detail }} / {{ item.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if recent_document_activity %}
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Recent Document Actions</h2>
+            </div>
+
+            <div class="panel-body">
+                {% for item in recent_document_activity %}
+                <div class="notice-item">
+                    <div class="notice-icon">
+                        <i class="fas fa-file-waveform"></i>
+                    </div>
+                    <div class="notice-content">
+                        <strong>{{ item.action }}</strong>
+                        <p>{{ item.target_label }} / {{ item.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+
+{% if dashboard_type == "admin" %}
+<section class="content-grid">
+    {% if recent_security_events %}
+    <div class="card large-card dashboard-section-card">
+        <div class="card-header dashboard-section-header">
+            <h2>Recent Security Events</h2>
+        </div>
+            <div class="panel-body">
+                {% for item in recent_security_events %}
+                <a href="{% url 'login_history' %}" class="notice-item">
+                    <div class="notice-icon"><i class="fas fa-triangle-exclamation"></i></div>
+                    <div class="notice-content">
+                        <strong>{{ item.action }}</strong>
+                        <p>{{ item.target_label }} / {{ item.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+
+    <div class="side-panels">
+        {% if admin_security_breakdown %}
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Auth Alert Breakdown</h2>
+            </div>
+            <div class="panel-body">
+                {% for item in admin_security_breakdown %}
+                <a href="{{ item.url }}" class="notice-item">
+                    <div class="notice-icon"><i class="{{ item.icon }}"></i></div>
+                    <div class="notice-content">
+                        <strong>{{ item.title }}: {{ item.value }}</strong>
+                        <p>{{ item.detail }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if recent_permission_updates %}
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Permission Updates</h2>
+            </div>
+            <div class="panel-body">
+                {% for item in recent_permission_updates %}
+                <a href="{% url 'role_permissions' %}" class="notice-item">
+                    <div class="notice-icon"><i class="fas fa-key"></i></div>
+                    <div class="notice-content">
+                        <strong>{{ item.action }}</strong>
+                        <p>{{ item.target_label }} / {{ item.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<section class="content-grid">
+    <div class="card large-card dashboard-section-card">
+        <div class="card-header dashboard-section-header">
+            <h2>System Health Checklist</h2>
+        </div>
+        <div class="panel-body">
+            {% for item in admin_health_checks %}
+            <a href="{{ item.url }}" class="notice-item">
+                <div class="notice-icon"><i class="fas fa-circle-check"></i></div>
+                <div class="notice-content">
+                    <strong>{{ item.title }}: {{ item.status }}</strong>
+                    <p>{{ item.detail }}</p>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="side-panels">
+        {% if recent_maintenance_logs %}
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Maintenance Log</h2>
+            </div>
+            <div class="panel-body">
+                {% for item in recent_maintenance_logs %}
+                <a href="{% url 'it_admin_center' %}" class="notice-item">
+                    <div class="notice-icon"><i class="fas fa-screwdriver-wrench"></i></div>
+                    <div class="notice-content">
+                        <strong>{{ item.title }}</strong>
+                        <p>{{ item.category }} / {{ item.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if recent_staff_activity %}
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Recent Staff Activity</h2>
+            </div>
+            <div class="panel-body">
+                {% for item in recent_staff_activity %}
+                <a href="{% url 'staff' %}" class="notice-item">
+                    <div class="notice-icon"><i class="fas fa-users"></i></div>
+                    <div class="notice-content">
+                        <strong>{% if item.actor %}{{ item.actor.full_name }}{% else %}-{% endif %}</strong>
+                        <p>{{ item.action }} / {{ item.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </a>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% elif overdue_by_department or pending_by_officer or recent_staff_activity %}
+<section class="content-grid">
+    {% if overdue_by_department %}
+    <div class="card large-card dashboard-section-card">
+        <div class="card-header dashboard-section-header">
+            <h2>Overdue by Department</h2>
+        </div>
+        <div class="panel-body">
+            {% for item in overdue_by_department %}
+            <div class="notice-item">
+                <div class="notice-icon"><i class="fas fa-building"></i></div>
+                <div class="notice-content">
+                    <strong>{{ item.department|default:"Unspecified" }}</strong>
+                    <p>{{ item.total }} overdue document{{ item.total|pluralize }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if pending_by_officer or recent_staff_activity %}
+    <div class="side-panels">
+        {% if pending_by_officer %}
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Pending by Officer</h2>
+            </div>
+            <div class="panel-body">
+                {% for item in pending_by_officer %}
+                <div class="notice-item">
+                    <div class="notice-icon"><i class="fas fa-user"></i></div>
+                    <div class="notice-content">
+                        <strong>{{ item.assigned_to__full_name }}</strong>
+                        <p>{{ item.total }} pending item{{ item.total|pluralize }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if recent_staff_activity %}
+        <div class="card dashboard-section-card">
+            <div class="card-header dashboard-section-header">
+                <h2>Recent Staff Activity</h2>
+            </div>
+            <div class="panel-body">
+                {% for item in recent_staff_activity %}
+                <div class="notice-item">
+                    <div class="notice-icon"><i class="fas fa-user-shield"></i></div>
+                    <div class="notice-content">
+                        <strong>{% if item.actor %}{{ item.actor.full_name }}{% else %}-{% endif %}</strong>
+                        <p>{{ item.action }} / {{ item.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+</section>
+{% endif %}
+{% endblock %}

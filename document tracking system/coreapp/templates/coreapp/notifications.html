@@ -1,0 +1,108 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Notifications | PPBMED{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}?v=20260331a">
+<link rel="stylesheet" href="{% static 'coreapp/css/notifications.css' %}?v=20260331b">
+{% endblock %}
+{% block page_title %}Notifications{% endblock %}
+{% block page_subtitle %}Alerts and updates.{% endblock %}
+
+{% block content %}
+<div class="notifications-mail-shell">
+    <div class="card records-card notifications-mailbox">
+        <div class="notifications-mailbox-toolbar">
+            <div class="mailbox-toolbar-title">
+                <h2>Inbox</h2>
+                <p>{{ unread_notifications_total }} unread</p>
+            </div>
+
+            <div class="mailbox-toolbar-actions">
+                <span class="mailbox-count-pill">All {{ all_notifications_count }}</span>
+                <span class="mailbox-count-pill unread">Unread {{ unread_notifications_total }}</span>
+                <span class="mailbox-count-pill">Read {{ read_notifications_total }}</span>
+                {% if unread_notifications_total %}
+                <a href="{% url 'mark_all_notifications_read' %}" class="mailbox-toolbar-btn">
+                    <i class="fas fa-check-double"></i>
+                    <span>Mark all as read</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if notifications %}
+            <div class="notifications-mail-list-head">
+                <span>Type</span>
+                <span>Message</span>
+                <span>Time</span>
+                <span>Actions</span>
+            </div>
+
+            <div class="notifications-mail-list">
+                {% for item in notifications %}
+                <article class="notifications-mail-row {% if not item.is_read %}is-unread{% endif %}">
+                    <div class="mail-row-type">
+                        <span class="mail-row-status-dot {% if item.is_read %}is-read{% else %}is-unread{% endif %}"></span>
+                        <span class="mail-row-type-label">{{ item.get_notification_type_display }}</span>
+                    </div>
+
+                    <a href="{% url 'open_notification' item.pk %}" class="mail-row-main">
+                        <span class="mail-row-subject">{{ item.message }}</span>
+                        <span class="mail-row-preview">
+                            {% if item.document %}
+                                {{ item.document.reference_id }}
+                            {% elif item.staff_message %}
+                                {{ item.staff_message.subject }}
+                            {% else %}
+                                General update
+                            {% endif %}
+                        </span>
+                    </a>
+
+                    <div class="mail-row-time">
+                        <span>{{ item.created_at|date:"M d, Y" }}</span>
+                        <small>{{ item.created_at|date:"H:i" }}</small>
+                    </div>
+
+                    <div class="mail-row-actions">
+                        <a href="{% url 'open_notification' item.pk %}" class="mail-row-action-link">Open</a>
+                        {% if not item.is_read %}
+                            <a href="{% url 'mark_notification_read' item.pk %}" class="mail-row-action-link secondary">Read</a>
+                        {% endif %}
+                    </div>
+                </article>
+                {% endfor %}
+            </div>
+
+            {% if notifications.has_other_pages %}
+            <div class="pagination-wrap">
+                <div class="pagination-info">
+                    Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}
+                </div>
+
+                <div class="pagination-controls">
+                    {% if notifications.has_previous %}
+                        <a href="?page=1" class="pagination-btn">First</a>
+                        <a href="?page={{ notifications.previous_page_number }}" class="pagination-btn">Previous</a>
+                    {% endif %}
+
+                    <span class="pagination-current">{{ notifications.number }}</span>
+
+                    {% if notifications.has_next %}
+                        <a href="?page={{ notifications.next_page_number }}" class="pagination-btn">Next</a>
+                        <a href="?page={{ notifications.paginator.num_pages }}" class="pagination-btn">Last</a>
+                    {% endif %}
+                </div>
+            </div>
+            {% endif %}
+        {% else %}
+            <div class="notifications-empty-state">
+                <div class="notifications-empty-icon"><i class="fas fa-bell-slash"></i></div>
+                <h3>No notifications yet</h3>
+                <p>Assignments, returns, and updates will appear here.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

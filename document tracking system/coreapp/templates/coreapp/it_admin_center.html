@@ -1,0 +1,262 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}IT Admin | PPBMED{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}?v=20260330f">
+<style>
+    .it-admin-shell {
+        display: grid;
+        gap: 22px;
+    }
+
+    .it-admin-grid {
+        display: grid;
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 22px;
+    }
+
+    .it-admin-list {
+        display: grid;
+        gap: 14px;
+    }
+
+    .it-admin-item {
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid #dbe7f4;
+        background: #f8fbff;
+    }
+
+    .it-admin-item strong {
+        display: block;
+        color: #0f172a;
+        margin-bottom: 6px;
+    }
+
+    .it-admin-item p,
+    .it-admin-item li {
+        color: #64748b;
+        line-height: 1.7;
+    }
+
+    .it-admin-item ol {
+        margin: 8px 0 0 18px;
+        display: grid;
+        gap: 8px;
+    }
+
+    body.theme-dark .it-admin-item {
+        background: rgba(15, 23, 42, 0.76);
+        border-color: #334155;
+    }
+
+    body.theme-dark .it-admin-item strong {
+        color: #f8fafc;
+    }
+
+    body.theme-dark .it-admin-item p,
+    body.theme-dark .it-admin-item li {
+        color: #cbd5e1;
+    }
+
+    @media (max-width: 980px) {
+        .it-admin-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+{% block page_title %}IT Admin Center{% endblock %}
+{% block page_subtitle %}Technical notes, backup status, and maintenance tracking for system administration.{% endblock %}
+
+{% block content %}
+<div class="it-admin-shell">
+    <section class="records-workspace-hero">
+        <div class="records-workspace-copy">
+            <div class="records-badge"><i class="fas fa-server"></i><span>Technical workspace</span></div>
+            <h2>Use one place for server operations, deployment notes, backup checks, and maintenance history.</h2>
+            <p>This page is meant for technical administration work inside the system, separate from normal document operations.</p>
+        </div>
+
+        <div class="records-workspace-side">
+            <div class="records-hero-summary">
+                <span class="records-hero-summary-label">Latest backup</span>
+                <strong>{% if latest_backup %}{{ latest_backup.name }}{% else %}None yet{% endif %}</strong>
+                <p>{% if latest_backup %}Updated {{ latest_backup.modified_at|date:"M d, Y H:i" }}.{% else %}Run backup-system.ps1 to create the first backup set.{% endif %}</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="documents-summary-grid">
+        <div class="mini-stat-card blue">
+            <div class="mini-stat-icon"><i class="fas fa-screwdriver-wrench"></i></div>
+            <div class="mini-stat-text">
+                <p>Maintenance Logs</p>
+                <h3>{{ maintenance_logs|length }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card green">
+            <div class="mini-stat-icon"><i class="fas fa-database"></i></div>
+            <div class="mini-stat-text">
+                <p>Database Backup</p>
+                <h3>{% if latest_backup and latest_backup.has_database %}Ready{% else %}Check{% endif %}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card orange">
+            <div class="mini-stat-icon"><i class="fas fa-folder-tree"></i></div>
+            <div class="mini-stat-text">
+                <p>Media Backup</p>
+                <h3>{% if latest_backup and latest_backup.has_media %}Ready{% else %}Check{% endif %}</h3>
+            </div>
+        </div>
+    </section>
+
+    <div class="it-admin-grid">
+        <div class="card records-card data-panel-card">
+            <div class="card-header records-card-header data-panel-header">
+                <div>
+                    <span class="records-section-eyebrow">Technical notes</span>
+                    <h2>What IT should manage here</h2>
+                </div>
+            </div>
+            <div class="panel-body it-admin-list">
+                {% for item in technical_notes %}
+                <div class="it-admin-item">
+                    <strong>{{ item.title }}</strong>
+                    <p>{{ item.detail }}</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card records-card data-panel-card">
+            <div class="card-header records-card-header data-panel-header">
+                <div>
+                    <span class="records-section-eyebrow">Log maintenance</span>
+                    <h2>Add maintenance note</h2>
+                </div>
+            </div>
+            <div class="panel-body">
+                <form method="post" class="document-form">
+                    {% csrf_token %}
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="id_category">Category</label>
+                            <input type="text" id="id_category" name="category" class="form-control" placeholder="Backup, Server, Email, Deployment">
+                        </div>
+                        <div class="form-group">
+                            <label for="id_title">Title</label>
+                            <input type="text" id="id_title" name="title" class="form-control" placeholder="Short maintenance title">
+                        </div>
+                        <div class="form-group full-width">
+                            <label for="id_details">Details</label>
+                            <textarea id="id_details" name="details" class="form-control" rows="5" placeholder="Describe what was done, when, and why."></textarea>
+                        </div>
+                    </div>
+                    <div class="settings-action-row compact-row">
+                        <button type="submit" class="settings-action-btn">Save Maintenance Log</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="it-admin-grid">
+        <div class="card records-card data-panel-card">
+            <div class="card-header records-card-header data-panel-header">
+                <div>
+                    <span class="records-section-eyebrow">Setup guides</span>
+                    <h2>Technical checklist</h2>
+                </div>
+            </div>
+            <div class="panel-body it-admin-list">
+                {% for guide in setup_guides %}
+                <div class="it-admin-item">
+                    <strong>{{ guide.title }}</strong>
+                    <ol>
+                        {% for step in guide.steps %}
+                        <li>{{ step }}</li>
+                        {% endfor %}
+                    </ol>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="card records-card data-panel-card">
+            <div class="card-header records-card-header data-panel-header">
+                <div>
+                    <span class="records-section-eyebrow">Backup folders</span>
+                    <h2>Recent backup status</h2>
+                </div>
+            </div>
+            <div class="table-wrap modern-table-wrap">
+                <table class="documents-table">
+                    <thead>
+                        <tr>
+                            <th>Folder</th>
+                            <th>Database</th>
+                            <th>Media</th>
+                            <th>Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in backup_folders %}
+                        <tr>
+                            <td>{{ item.name }}</td>
+                            <td><span class="table-badge {% if item.has_database %}badge-green{% else %}badge-red{% endif %}">{% if item.has_database %}Included{% else %}Missing{% endif %}</span></td>
+                            <td><span class="table-badge {% if item.has_media %}badge-green{% else %}badge-red{% endif %}">{% if item.has_media %}Included{% else %}Missing{% endif %}</span></td>
+                            <td>{{ item.modified_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="empty-row">No backup folders found yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="card records-card data-panel-card">
+        <div class="card-header records-card-header data-panel-header">
+            <div>
+                <span class="records-section-eyebrow">History</span>
+                <h2>Recent maintenance logs</h2>
+            </div>
+        </div>
+        <div class="table-wrap modern-table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Category</th>
+                        <th>Title</th>
+                        <th>Details</th>
+                        <th>Logged By</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in maintenance_logs %}
+                    <tr>
+                        <td>{{ item.category }}</td>
+                        <td>{{ item.title }}</td>
+                        <td>{{ item.details|truncatechars:120 }}</td>
+                        <td>{% if item.logged_by %}{{ item.logged_by.full_name }}{% else %}-{% endif %}</td>
+                        <td>{{ item.created_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-row">No maintenance logs yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

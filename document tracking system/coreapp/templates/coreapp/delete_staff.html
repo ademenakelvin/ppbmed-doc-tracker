@@ -1,0 +1,79 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Archive Staff | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/delete-pages.css' %}?v=20260330c">{% endblock %}
+{% block page_title %}Archive Staff{% endblock %}
+{% block page_subtitle %}Archive a staff record.{% endblock %}
+
+{% block content %}
+<section class="delete-hero">
+    <div class="delete-copy">
+        <div class="delete-badge">
+            <i class="fas fa-triangle-exclamation"></i>
+            <span>Destructive action</span>
+        </div>
+        <h2>Archive this staff record?</h2>
+        <p>It leaves active lists but can still be restored later.</p>
+    </div>
+    <div class="delete-side">
+        <div class="delete-side-card">
+            <strong>Staff member</strong>
+            <p>{{ staff_member.full_name }}</p>
+        </div>
+        <div class="delete-side-card subtle">
+            <strong>Role</strong>
+            <p>{{ staff_member.role }}{% if staff_member.department %} / {{ staff_member.department }}{% endif %}</p>
+        </div>
+    </div>
+</section>
+
+<div class="card delete-card">
+    <div class="card-header delete-card-header">
+        <div>
+            <h2>Archive Staff</h2>
+            <p>Review the profile before archiving.</p>
+        </div>
+        <div class="delete-chip">
+            <i class="fas fa-user-xmark"></i>
+            <span>Archive record</span>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <div class="delete-confirm-box">
+            <h3>Final confirmation required</h3>
+            <p>Archiving removes the profile from active lists and assignment options.</p>
+
+            <div class="delete-record">
+                <div>
+                    <span class="delete-record-label">Staff record</span>
+                    <strong>{{ staff_member.full_name }} - {{ staff_member.role }}</strong>
+                </div>
+            </div>
+
+            <div class="delete-warning-list">
+                <div class="delete-warning-item">
+                    <i class="fas fa-circle-xmark"></i>
+                    <span>The profile leaves active staff listings and assignment options.</span>
+                </div>
+                <div class="delete-warning-item">
+                    <i class="fas fa-circle-xmark"></i>
+                    <span>The history stays available and can be restored later.</span>
+                </div>
+            </div>
+
+            <form method="post" class="delete-form">
+                {% csrf_token %}
+                <div class="form-group full-width">
+                    <label for="confirm_full_name">Type <strong>{{ staff_member.full_name }}</strong> to approve this archive</label>
+                    <input type="text" id="confirm_full_name" name="confirm_full_name" class="form-control" placeholder="Enter {{ staff_member.full_name }}">
+                    {% if confirmation_error %}<small class="field-error">{{ confirmation_error }}</small>{% endif %}
+                </div>
+                <a href="{% url 'staff' %}" class="delete-cancel-link">Cancel</a>
+                <button type="submit" class="delete-submit-btn">Yes, Archive Staff</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

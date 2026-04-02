@@ -1,0 +1,128 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Backups | PPBMED{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}?v=20260330e">
+<style>
+    .backup-grid {
+        display: grid;
+        gap: 22px;
+    }
+
+    .backup-checklist {
+        display: grid;
+        gap: 14px;
+    }
+
+    .backup-item {
+        padding: 18px;
+        border-radius: 18px;
+        border: 1px solid #dbe7f4;
+        background: #f8fbff;
+        color: #475569;
+        line-height: 1.7;
+    }
+
+    body.theme-dark .backup-item {
+        background: rgba(15, 23, 42, 0.76);
+        border-color: #334155;
+        color: #cbd5e1;
+    }
+</style>
+{% endblock %}
+{% block page_title %}Backup Center{% endblock %}
+{% block page_subtitle %}Review backup readiness and recent backup folders.{% endblock %}
+
+{% block content %}
+<div class="backup-grid">
+    <section class="records-workspace-hero">
+        <div class="records-workspace-copy">
+            <div class="records-badge"><i class="fas fa-database"></i><span>Backup readiness</span></div>
+            <h2>Keep database and attachment backups ready before anything goes wrong.</h2>
+            <p>This page helps the Director confirm backup availability and follow a safe restore process without guessing under pressure.</p>
+        </div>
+        <div class="records-workspace-side">
+            <div class="records-hero-summary">
+                <span class="records-hero-summary-label">Latest backup</span>
+                <strong>{% if latest_backup %}{{ latest_backup.name }}{% else %}None yet{% endif %}</strong>
+                <p>{% if latest_backup %}Updated {{ latest_backup.modified_at|date:"M d, Y H:i" }}.{% else %}Run `backup-system.ps1` to create the first backup.{% endif %}</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="documents-summary-grid">
+        <div class="mini-stat-card blue">
+            <div class="mini-stat-icon"><i class="fas fa-clock-rotate-left"></i></div>
+            <div class="mini-stat-text">
+                <p>Saved Backups</p>
+                <h3>{{ backup_folders|length }}</h3>
+            </div>
+        </div>
+        <div class="mini-stat-card green">
+            <div class="mini-stat-icon"><i class="fas fa-database"></i></div>
+            <div class="mini-stat-text">
+                <p>Database Ready</p>
+                <h3>{% if latest_backup and latest_backup.has_database %}Yes{% else %}No{% endif %}</h3>
+            </div>
+        </div>
+        <div class="mini-stat-card orange">
+            <div class="mini-stat-icon"><i class="fas fa-folder-tree"></i></div>
+            <div class="mini-stat-text">
+                <p>Media Ready</p>
+                <h3>{% if latest_backup and latest_backup.has_media %}Yes{% else %}No{% endif %}</h3>
+            </div>
+        </div>
+    </section>
+
+    <div class="card records-card data-panel-card">
+        <div class="card-header records-card-header data-panel-header">
+            <div>
+                <span class="records-section-eyebrow">Recovery guide</span>
+                <h2>Backup and restore checklist</h2>
+            </div>
+        </div>
+        <div class="panel-body backup-checklist">
+            <div class="backup-item"><strong>1. Create backups regularly.</strong> Run `backup-system.ps1` and copy the resulting folder off the server.</div>
+            <div class="backup-item"><strong>2. Verify both database and media are present.</strong> A database without attachments, or attachments without the database, is not a full recovery point.</div>
+            <div class="backup-item"><strong>3. Restore carefully.</strong> Stop the app first, replace `db.sqlite3` and the `media` folder from the backup set, then start the app and test key pages.</div>
+            <div class="backup-item"><strong>4. Keep more than one backup.</strong> Do not rely on only the latest folder in case the last backup was taken after a mistake.</div>
+        </div>
+    </div>
+
+    <div class="card records-card data-panel-card">
+        <div class="card-header records-card-header data-panel-header">
+            <div>
+                <span class="records-section-eyebrow">Backup folders</span>
+                <h2>Recent backup inventory</h2>
+            </div>
+        </div>
+        <div class="table-wrap modern-table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Folder</th>
+                        <th>Database</th>
+                        <th>Media</th>
+                        <th>Modified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in backup_folders %}
+                    <tr>
+                        <td>{{ item.name }}</td>
+                        <td><span class="table-badge {% if item.has_database %}badge-green{% else %}badge-red{% endif %}">{% if item.has_database %}Included{% else %}Missing{% endif %}</span></td>
+                        <td><span class="table-badge {% if item.has_media %}badge-green{% else %}badge-red{% endif %}">{% if item.has_media %}Included{% else %}Missing{% endif %}</span></td>
+                        <td>{{ item.modified_at|date:"M d, Y H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="empty-row">No backups found yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

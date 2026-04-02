@@ -1,0 +1,144 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Add Staff | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/staff-form.css' %}?v=20260330f">{% endblock %}
+{% block page_title %}Add Staff{% endblock %}
+{% block page_subtitle %}Create a staff record.{% endblock %}
+
+{% block content %}
+<section class="staff-form-hero">
+    <div class="staff-form-copy">
+        <div class="staff-form-badge">
+            <i class="fas fa-user-plus"></i>
+            <span>Staff onboarding</span>
+        </div>
+        <h2>Add a staff member.</h2>
+        <p>Set the profile, department, and optional login in one place.</p>
+    </div>
+    <div class="staff-form-side">
+        <div class="staff-side-card">
+            <strong>Profile</strong>
+            <p>Role, department, and contact details.</p>
+        </div>
+        <div class="staff-side-card subtle">
+            <strong>Login optional</strong>
+            <p>Link or create an account only if needed.</p>
+        </div>
+    </div>
+</section>
+
+<div class="card staff-form-card">
+        <div class="card-header staff-form-header">
+            <div>
+                <h2>New Staff Form</h2>
+                <p>Complete the form to create the record.</p>
+            </div>
+        <div class="staff-form-chip">
+            <i class="fas fa-id-badge"></i>
+            <span>Routing ready</span>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <form method="post" class="document-form staff-form-layout">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <section class="form-section">
+                    <div class="form-section-heading">
+                        <h3>Profile Details</h3>
+                        <p>Basic information used for routing and assignment.</p>
+                    </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.user.id_for_label }}">Existing Django User</label>
+                        {{ form.user }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.full_name.id_for_label }}">Full Name</label>
+                        {{ form.full_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.role.id_for_label }}">Role</label>
+                        {{ form.role }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.department.id_for_label }}">Department</label>
+                        {{ form.department }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<small class="field-error">{{ form.email.errors|striptags }}</small>{% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="checkbox-tile">
+                            {{ form.is_active }}
+                            <span>
+                                <strong>Active Staff Member</strong>
+                                <small>Enable this officer for document assignment and routing.</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                    <div class="form-section-heading">
+                        <h3>Login Access</h3>
+                        <p>Create credentials only if this person needs to sign in.</p>
+                    </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="checkbox-tile">
+                            {{ form.create_login_account }}
+                            <span>
+                                <strong>Create login account for this staff member</strong>
+                                <small>Use this when the officer should sign in personally.</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}">Username</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}<small class="field-error">{{ form.username.errors|striptags }}</small>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password.id_for_label }}">Password</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}<small class="field-error">{{ form.password.errors|striptags }}</small>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.confirm_password.id_for_label }}">Confirm Password</label>
+                        {{ form.confirm_password }}
+                        {% if form.confirm_password.errors %}<small class="field-error">{{ form.confirm_password.errors|striptags }}</small>{% endif %}
+                    </div>
+
+                </div>
+            </section>
+
+            <div class="form-actions staff-form-actions">
+                <a href="{% url 'staff' %}" class="staff-cancel-link">Cancel</a>
+                <button type="submit" class="save-btn staff-save-btn">Save Staff</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

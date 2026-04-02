@@ -1,0 +1,552 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Reports & Analytics | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}?v=20260330e">{% endblock %}
+{% block page_title %}Reports & Analytics{% endblock %}
+{% block page_subtitle %}Document analytics and workload.{% endblock %}
+
+{% block content %}
+<div class="reports-shell">
+    <section class="reports-hero-panel">
+        <div class="reports-hero-copy">
+            <div class="records-badge reports-badge-pill">
+                <i class="fas fa-chart-line"></i>
+                <span>Analytics center</span>
+            </div>
+
+            <h2>Reports built for quick decisions.</h2>
+            <p>See volume, status, priority, and workload across the office.</p>
+
+            <div class="reports-hero-meta">
+                <div class="reports-hero-chip">
+                    <i class="fas fa-arrow-down"></i>
+                    <span>{{ incoming_documents }} incoming</span>
+                </div>
+                <div class="reports-hero-chip">
+                    <i class="fas fa-arrow-up"></i>
+                    <span>{{ outgoing_documents }} outgoing</span>
+                </div>
+                <div class="reports-hero-chip">
+                    <i class="fas fa-users"></i>
+                    <span>{{ staff_data|length }} staff tracked</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="reports-hero-side">
+            <div class="hero-insight-card primary">
+                <span class="hero-insight-label">Completed</span>
+                <strong class="count-up" data-target="{{ completed_documents }}">{{ completed_documents }}</strong>
+                <p>documents closed.</p>
+            </div>
+
+            <div class="hero-insight-card">
+                <span class="hero-insight-label">Overdue</span>
+                <strong class="count-up" data-target="{{ overdue_documents }}">{{ overdue_documents }}</strong>
+                <p>item{{ overdue_documents|pluralize }} need attention.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="reports-kpi-grid">
+        <article class="reports-kpi-card tone-blue">
+            <div class="reports-kpi-top">
+                <div class="reports-kpi-icon"><i class="fas fa-folder"></i></div>
+                <span class="reports-kpi-tag">Portfolio</span>
+            </div>
+            <div class="reports-kpi-copy">
+                <p>Total documents</p>
+                <h3 class="count-up" data-target="{{ total_documents }}">{{ total_documents }}</h3>
+                <span>All tracked records.</span>
+            </div>
+        </article>
+
+        <article class="reports-kpi-card tone-amber">
+            <div class="reports-kpi-top">
+                <div class="reports-kpi-icon"><i class="fas fa-clock"></i></div>
+                <span class="reports-kpi-tag">Needs focus</span>
+            </div>
+            <div class="reports-kpi-copy">
+                <p>Pending</p>
+                <h3 class="count-up" data-target="{{ pending_documents }}">{{ pending_documents }}</h3>
+                <span>Awaiting action.</span>
+            </div>
+        </article>
+
+        <article class="reports-kpi-card tone-emerald">
+            <div class="reports-kpi-top">
+                <div class="reports-kpi-icon"><i class="fas fa-circle-check"></i></div>
+                <span class="reports-kpi-tag">Resolved</span>
+            </div>
+            <div class="reports-kpi-copy">
+                <p>Completed</p>
+                <h3 class="count-up" data-target="{{ completed_documents }}">{{ completed_documents }}</h3>
+                <span>Already closed.</span>
+            </div>
+        </article>
+
+        <article class="reports-kpi-card tone-rose">
+            <div class="reports-kpi-top">
+                <div class="reports-kpi-icon"><i class="fas fa-triangle-exclamation"></i></div>
+                <span class="reports-kpi-tag">Risk</span>
+            </div>
+            <div class="reports-kpi-copy">
+                <p>Overdue</p>
+                <h3 class="count-up" data-target="{{ overdue_documents }}">{{ overdue_documents }}</h3>
+                <span>Past expected deadline.</span>
+            </div>
+        </article>
+    </section>
+
+    <div class="card records-card data-panel-card">
+        <div class="card-header records-card-header data-panel-header">
+            <div>
+                <span class="records-section-eyebrow">Filters</span>
+                <h2>Filter reports</h2>
+            </div>
+            <a href="{% url 'export_reports_csv' %}?status={{ status_filter|urlencode }}&priority={{ priority_filter|urlencode }}&department={{ department_filter|urlencode }}&date_from={{ date_from|urlencode }}&date_to={{ date_to|urlencode }}&archive={{ archive_filter|urlencode }}" class="documents-reset-btn">Export CSV</a>
+        </div>
+        <div class="panel-body data-panel-toolbar">
+            <form method="get" class="documents-top-filter modern-filter-bar">
+                <select name="status" class="documents-select">
+                    <option value="">Status: All</option>
+                    <option value="Pending" {% if status_filter == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="In Progress" {% if status_filter == "In Progress" %}selected{% endif %}>In Progress</option>
+                    <option value="Completed" {% if status_filter == "Completed" %}selected{% endif %}>Completed</option>
+                    <option value="Overdue" {% if status_filter == "Overdue" %}selected{% endif %}>Overdue</option>
+                </select>
+                <select name="priority" class="documents-select">
+                    <option value="">Priority: All</option>
+                    <option value="Low" {% if priority_filter == "Low" %}selected{% endif %}>Low</option>
+                    <option value="Medium" {% if priority_filter == "Medium" %}selected{% endif %}>Medium</option>
+                    <option value="High" {% if priority_filter == "High" %}selected{% endif %}>High</option>
+                </select>
+                <select name="department" class="documents-select">
+                    <option value="">Department: All</option>
+                    {% for department in department_options %}
+                    <option value="{{ department }}" {% if department_filter == department %}selected{% endif %}>{{ department }}</option>
+                    {% endfor %}
+                </select>
+                <input type="date" name="date_from" class="documents-select" value="{{ date_from }}">
+                <input type="date" name="date_to" class="documents-select" value="{{ date_to }}">
+                <select name="archive" class="documents-select">
+                    <option value="active" {% if archive_filter == "active" %}selected{% endif %}>Active only</option>
+                    <option value="archived" {% if archive_filter == "archived" %}selected{% endif %}>Archived only</option>
+                    <option value="all" {% if archive_filter == "all" %}selected{% endif %}>Active + Archived</option>
+                </select>
+                <button type="submit" class="documents-filter-btn"><i class="fas fa-sliders-h"></i><span>Apply</span></button>
+                <a href="{% url 'reports' %}" class="documents-reset-btn">Reset</a>
+            </form>
+        </div>
+    </div>
+
+    <section class="reports-overview-grid">
+        <article class="card records-card reports-highlight-card">
+            <div class="card-header records-card-header">
+                <div>
+                    <span class="reports-section-eyebrow">Operations pulse</span>
+                    <h2>Reporting highlights</h2>
+                </div>
+            </div>
+
+            <div class="reports-highlight-list">
+                <div class="reports-highlight-item">
+                    <div class="reports-highlight-icon tone-blue"><i class="fas fa-layer-group"></i></div>
+                    <div>
+                        <strong>{{ status_data|length }} live status bucket{{ status_data|length|pluralize }}</strong>
+                        <p>Workflow states across tracked documents.</p>
+                    </div>
+                </div>
+
+                <div class="reports-highlight-item">
+                    <div class="reports-highlight-icon tone-amber"><i class="fas fa-flag"></i></div>
+                    <div>
+                        <strong>{{ priority_data|length }} priority tier{{ priority_data|length|pluralize }}</strong>
+                        <p>Current urgency mix across records.</p>
+                    </div>
+                </div>
+
+                <div class="reports-highlight-item">
+                    <div class="reports-highlight-icon tone-emerald"><i class="fas fa-user-check"></i></div>
+                    <div>
+                        <strong>{{ staff_data.0.full_name|default:"No staff assignments yet" }}</strong>
+                        <p>
+                            {% if staff_data %}
+                                Highest current workload with {{ staff_data.0.total_docs }} assigned document{{ staff_data.0.total_docs|pluralize }}.
+                            {% else %}
+                                Workload appears here when assignments are made.
+                            {% endif %}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </article>
+
+        <article class="card records-card reports-highlight-card">
+            <div class="card-header records-card-header">
+                <div>
+                    <span class="reports-section-eyebrow">Direction mix</span>
+                    <h2>Movement summary</h2>
+                </div>
+            </div>
+
+            <div class="reports-direction-grid">
+                <div class="reports-direction-card inbound">
+                    <span>Incoming</span>
+                    <strong class="count-up" data-target="{{ incoming_documents }}">{{ incoming_documents }}</strong>
+                    <p>Received documents.</p>
+                </div>
+
+                <div class="reports-direction-card outbound">
+                    <span>Outgoing</span>
+                    <strong class="count-up" data-target="{{ outgoing_documents }}">{{ outgoing_documents }}</strong>
+                    <p>Sent or routed documents.</p>
+                </div>
+            </div>
+        </article>
+    </section>
+
+    <section class="reports-chart-grid reports-chart-grid-modern">
+        <article class="card records-card reports-chart-card">
+            <div class="card-header records-card-header reports-panel-header">
+                <div>
+                    <span class="reports-section-eyebrow">Distribution</span>
+                    <h2>Status breakdown</h2>
+                </div>
+                <span class="reports-panel-note">{{ total_documents }} tracked total</span>
+            </div>
+            <div class="chart-card-body reports-chart-body">
+                <canvas id="statusChart" height="140"></canvas>
+            </div>
+        </article>
+
+        <article class="card records-card reports-chart-card">
+            <div class="card-header records-card-header reports-panel-header">
+                <div>
+                    <span class="reports-section-eyebrow">Priority mix</span>
+                    <h2>Urgency distribution</h2>
+                </div>
+                <span class="reports-panel-note">{{ priority_data|length }} categories</span>
+            </div>
+            <div class="chart-card-body reports-chart-body">
+                <canvas id="priorityChart" height="140"></canvas>
+            </div>
+        </article>
+    </section>
+
+    <section class="card records-card reports-chart-card reports-chart-card-wide">
+        <div class="card-header records-card-header reports-panel-header">
+            <div>
+                <span class="reports-section-eyebrow">Assignments</span>
+                <h2>Staff workload</h2>
+            </div>
+            <span class="reports-panel-note">{{ staff_data|length }} staff members</span>
+        </div>
+        <div class="chart-card-body reports-chart-body reports-chart-body-wide">
+            <canvas id="staffChart" height="120"></canvas>
+        </div>
+    </section>
+
+    <section class="reports-table-grid">
+        <article class="card records-card reports-data-card">
+            <div class="card-header records-card-header reports-panel-header">
+                <div>
+                    <span class="reports-section-eyebrow">Tabular report</span>
+                    <h2>Status report</h2>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="documents-table">
+                    <thead>
+                        <tr>
+                            <th>Status</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in status_data %}
+                        <tr>
+                            <td>{{ item.status }}</td>
+                            <td>{{ item.total }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="empty-row">No status data available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+
+        <article class="card records-card reports-data-card">
+            <div class="card-header records-card-header reports-panel-header">
+                <div>
+                    <span class="reports-section-eyebrow">Tabular report</span>
+                    <h2>Priority report</h2>
+                </div>
+            </div>
+            <div class="table-wrap">
+                <table class="documents-table">
+                    <thead>
+                        <tr>
+                            <th>Priority</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in priority_data %}
+                        <tr>
+                            <td>{{ item.priority }}</td>
+                            <td>{{ item.total }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="2" class="empty-row">No priority data available.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </article>
+    </section>
+
+    <section class="card records-card reports-data-card reports-workload-table-card">
+        <div class="card-header records-card-header reports-panel-header">
+            <div>
+                <span class="reports-section-eyebrow">Department view</span>
+                <h2>Department ownership</h2>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Department</th>
+                        <th>Total Documents</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in department_data %}
+                    <tr>
+                        <td>{{ item.department }}</td>
+                        <td>{{ item.total }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="2" class="empty-row">No department ownership data available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="card records-card reports-data-card reports-workload-table-card">
+        <div class="card-header records-card-header reports-panel-header">
+            <div>
+                <span class="reports-section-eyebrow">Resource allocation</span>
+                <h2>Staff workload details</h2>
+            </div>
+        </div>
+        <div class="table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Staff</th>
+                        <th>Role</th>
+                        <th>Total Assigned Documents</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in staff_data %}
+                    <tr>
+                        <td>{{ item.full_name }}</td>
+                        <td>{{ item.role }}</td>
+                        <td>{{ item.total_docs }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="empty-row">No staff workload data available.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+</div>
+
+{{ status_data|json_script:"status-data" }}
+{{ priority_data|json_script:"priority-data" }}
+{{ staff_data|json_script:"staff-data" }}
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const statusData = JSON.parse(document.getElementById('status-data').textContent);
+    const priorityData = JSON.parse(document.getElementById('priority-data').textContent);
+    const staffData = JSON.parse(document.getElementById('staff-data').textContent);
+
+    function drawBarChart(canvasId, labels, values, barClassName) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width = Math.max(canvas.parentElement.clientWidth - 10, 280);
+        const height = canvas.height = 320;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const padding = 40;
+        const chartWidth = width - (padding * 2);
+        const chartHeight = height - (padding * 2);
+        const maxValue = Math.max(...values, 1);
+        const barGap = values.length > 5 ? 14 : 18;
+        const barWidth = Math.max((chartWidth / Math.max(values.length, 1)) - barGap, 26);
+
+        ctx.font = '12px Inter, Arial, sans-serif';
+        ctx.fillStyle = '#6b7280';
+        ctx.strokeStyle = '#dbe4f0';
+        ctx.lineWidth = 1;
+
+        for (let i = 0; i <= 5; i++) {
+            const y = padding + (chartHeight / 5) * i;
+            ctx.beginPath();
+            ctx.moveTo(padding, y);
+            ctx.lineTo(width - padding, y);
+            ctx.stroke();
+        }
+
+        values.forEach((value, index) => {
+            const x = padding + index * (barWidth + barGap) + 10;
+            const barHeight = (value / maxValue) * (chartHeight - 20);
+            const y = height - padding - barHeight;
+
+            let fill = '#94a3b8';
+            if (barClassName === 'status') fill = '#2563eb';
+            if (barClassName === 'priority') fill = '#f59e0b';
+            if (barClassName === 'staff') fill = '#0f9f78';
+
+            ctx.fillStyle = fill;
+            ctx.fillRect(x, y, barWidth, barHeight);
+
+            ctx.fillStyle = '#111827';
+            ctx.textAlign = 'center';
+            ctx.fillText(value, x + (barWidth / 2), y - 8);
+
+            ctx.fillStyle = '#6b7280';
+            const label = String(labels[index]).length > 12 ? String(labels[index]).slice(0, 12) + '...' : labels[index];
+            ctx.fillText(label, x + (barWidth / 2), height - padding + 18);
+        });
+    }
+
+    function drawDoughnutChart(canvasId, labels, values) {
+        const canvas = document.getElementById(canvasId);
+        if (!canvas) return;
+
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width = Math.max(canvas.parentElement.clientWidth - 10, 280);
+        const height = canvas.height = 320;
+
+        ctx.clearRect(0, 0, width, height);
+
+        const total = values.reduce((a, b) => a + b, 0) || 1;
+        const centerX = width / 2;
+        const centerY = height / 2 - 10;
+        const radius = 95;
+        const innerRadius = 56;
+
+        const colors = ['#2563eb', '#f59e0b', '#10b981', '#ef4444', '#0ea5e9', '#8b5cf6'];
+        let startAngle = -Math.PI / 2;
+
+        values.forEach((value, index) => {
+            const sliceAngle = (value / total) * (Math.PI * 2);
+
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY);
+            ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
+            ctx.closePath();
+            ctx.fillStyle = colors[index % colors.length];
+            ctx.fill();
+
+            startAngle += sliceAngle;
+        });
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+
+        ctx.fillStyle = '#111827';
+        ctx.font = 'bold 14px Inter, Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('Priority', centerX, centerY - 4);
+        ctx.font = '12px Inter, Arial, sans-serif';
+        ctx.fillStyle = '#6b7280';
+        ctx.fillText('Distribution', centerX, centerY + 16);
+
+        let legendY = height - 40;
+        let legendX = 25;
+
+        labels.forEach((label, index) => {
+            ctx.fillStyle = colors[index % colors.length];
+            ctx.fillRect(legendX, legendY, 14, 14);
+
+            ctx.fillStyle = '#374151';
+            ctx.textAlign = 'left';
+            ctx.font = '12px Inter, Arial, sans-serif';
+            ctx.fillText(`${label} (${values[index]})`, legendX + 20, legendY + 12);
+
+            legendX += 110;
+            if (legendX > width - 130) {
+                legendX = 25;
+                legendY += 22;
+            }
+        });
+    }
+
+    drawBarChart(
+        'statusChart',
+        statusData.map(item => item.status),
+        statusData.map(item => item.total),
+        'status'
+    );
+
+    drawDoughnutChart(
+        'priorityChart',
+        priorityData.map(item => item.priority),
+        priorityData.map(item => item.total)
+    );
+
+    drawBarChart(
+        'staffChart',
+        staffData.map(item => item.full_name),
+        staffData.map(item => item.total_docs),
+        'staff'
+    );
+
+    window.addEventListener('resize', function () {
+        drawBarChart(
+            'statusChart',
+            statusData.map(item => item.status),
+            statusData.map(item => item.total),
+            'status'
+        );
+
+        drawDoughnutChart(
+            'priorityChart',
+            priorityData.map(item => item.priority),
+            priorityData.map(item => item.total)
+        );
+
+        drawBarChart(
+            'staffChart',
+            staffData.map(item => item.full_name),
+            staffData.map(item => item.total_docs),
+            'staff'
+        );
+    });
+});
+</script>
+{% endblock %}
+

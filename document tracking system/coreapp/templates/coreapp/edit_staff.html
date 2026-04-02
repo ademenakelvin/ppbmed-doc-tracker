@@ -1,0 +1,145 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Edit Staff | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/staff-form.css' %}?v=20260330f">{% endblock %}
+{% block page_title %}Edit Staff{% endblock %}
+{% block page_subtitle %}Update staff information.{% endblock %}
+
+{% block content %}
+<section class="staff-form-hero">
+    <div class="staff-form-copy">
+        <div class="staff-form-badge">
+            <i class="fas fa-user-pen"></i>
+            <span>Staff management</span>
+        </div>
+        <h2>Update {{ staff_member.full_name }} without breaking routing ownership or access.</h2>
+        <p>Keep profile details current, manage activity status, and attach login access where appropriate.</p>
+    </div>
+    <div class="staff-form-side">
+        <div class="staff-side-card">
+            <strong>Current role</strong>
+            <p>{{ staff_member.role }}{% if staff_member.department %} in {{ staff_member.department }}{% endif %}</p>
+        </div>
+        <div class="staff-side-card subtle">
+            <strong>Linked login</strong>
+            <p>{% if staff_member.user %}{{ staff_member.user.username }}{% else %}No linked account yet{% endif %}</p>
+        </div>
+    </div>
+</section>
+
+<div class="card staff-form-card">
+    <div class="card-header staff-form-header">
+        <div>
+            <h2>Edit {{ staff_member.full_name }}</h2>
+            <p>Review and update this staff record carefully before saving changes.</p>
+        </div>
+        <div class="staff-form-chip">
+            <i class="fas fa-user-check"></i>
+            <span>Live profile</span>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <form method="post" class="document-form staff-form-layout">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-alert">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <section class="form-section">
+                <div class="form-section-heading">
+                    <h3>Profile Details</h3>
+                    <p>Update the staff record used for assignment, visibility, and routing.</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.user.id_for_label }}">Existing Django User</label>
+                        {{ form.user }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.full_name.id_for_label }}">Full Name</label>
+                        {{ form.full_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.role.id_for_label }}">Role</label>
+                        {{ form.role }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.department.id_for_label }}">Department</label>
+                        {{ form.department }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}">Email</label>
+                        {{ form.email }}
+                        {% if form.email.errors %}<small class="field-error">{{ form.email.errors|striptags }}</small>{% endif %}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="checkbox-tile">
+                            {{ form.is_active }}
+                            <span>
+                                <strong>Active Staff Member</strong>
+                                <small>Disable this only if the officer should no longer receive assignments.</small>
+                            </span>
+                        </label>
+                    </div>
+
+                </div>
+            </section>
+
+            {% if not staff_member.user %}
+            <section class="form-section">
+                <div class="form-section-heading">
+                    <h3>Login Access</h3>
+                    <p>Create system credentials only if this staff member should sign in directly.</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group full-width">
+                        <label class="checkbox-tile">
+                            {{ form.create_login_account }}
+                            <span>
+                                <strong>Create login account for this staff member</strong>
+                                <small>This option is available because no linked Django user exists yet.</small>
+                            </span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.username.id_for_label }}">Username</label>
+                        {{ form.username }}
+                        {% if form.username.errors %}<small class="field-error">{{ form.username.errors|striptags }}</small>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.password.id_for_label }}">Password</label>
+                        {{ form.password }}
+                        {% if form.password.errors %}<small class="field-error">{{ form.password.errors|striptags }}</small>{% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.confirm_password.id_for_label }}">Confirm Password</label>
+                        {{ form.confirm_password }}
+                        {% if form.confirm_password.errors %}<small class="field-error">{{ form.confirm_password.errors|striptags }}</small>{% endif %}
+                    </div>
+                </div>
+            </section>
+            {% endif %}
+
+            <div class="form-actions staff-form-actions">
+                <a href="{% url 'staff' %}" class="staff-cancel-link">Cancel</a>
+                <button type="submit" class="save-btn staff-save-btn">Update Staff</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

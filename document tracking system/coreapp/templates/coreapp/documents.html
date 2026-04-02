@@ -1,0 +1,336 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Documents | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}?v=20260330e">{% endblock %}
+{% block page_title %}Documents{% endblock %}
+{% block page_subtitle %}All documents in one workspace.{% endblock %}
+
+{% block content %}
+<div class="records-page-shell">
+    <section class="records-workspace-hero">
+        <div class="records-workspace-copy">
+            <div class="records-badge"><i class="fas fa-folder-open"></i><span>Document workspace</span></div>
+            <h2>Documents at a glance.</h2>
+            <p>Search, filter, and open records quickly.</p>
+        </div>
+
+        <div class="records-workspace-side">
+            {% if permission_flags.add_document %}
+            <a href="{% url 'add_document' %}" class="records-hero-action primary">
+                <i class="fas fa-plus"></i>
+                <span>New Document</span>
+            </a>
+            {% endif %}
+            <div class="records-hero-summary">
+                <span class="records-hero-summary-label">Overdue</span>
+                <strong>{{ overdue_documents_count }}</strong>
+                <p>record{{ overdue_documents_count|pluralize }} need follow-up.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="documents-summary-grid">
+        <div class="mini-stat-card blue">
+            <div class="mini-stat-icon"><i class="fas fa-folder-open"></i></div>
+            <div class="mini-stat-text">
+                <p>All Documents</p>
+                <h3>{{ all_documents_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card orange">
+            <div class="mini-stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="mini-stat-text">
+                <p>Pending Review</p>
+                <h3>{{ pending_documents_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card green">
+            <div class="mini-stat-icon"><i class="fas fa-circle-check"></i></div>
+            <div class="mini-stat-text">
+                <p>Completed</p>
+                <h3>{{ completed_documents_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card red">
+            <div class="mini-stat-icon"><i class="fas fa-circle-exclamation"></i></div>
+            <div class="mini-stat-text">
+                <p>Overdue</p>
+                <h3>{{ overdue_documents_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card orange">
+            <div class="mini-stat-icon"><i class="fas fa-box-archive"></i></div>
+            <div class="mini-stat-text">
+                <p>Archived</p>
+                <h3>{{ archived_documents_count }}</h3>
+            </div>
+        </div>
+    </section>
+
+    <div class="card records-card data-panel-card">
+        <div class="card-header records-card-header data-panel-header">
+            <div>
+                <span class="records-section-eyebrow">Library</span>
+                <h2>All documents</h2>
+            </div>
+            <div style="display:flex; gap:10px; align-items:center;">
+                <a href="{% url 'export_documents_csv' %}?search={{ search_query|urlencode }}&status={{ status_filter|urlencode }}&priority={{ priority_filter|urlencode }}&department={{ department_filter|urlencode }}&assigned_to={{ assigned_filter|urlencode }}&date_from={{ date_from|urlencode }}&date_to={{ date_to|urlencode }}&archive={{ archive_filter|urlencode }}" class="documents-reset-btn">Export CSV</a>
+                <span class="data-panel-note">{{ all_documents_count }} records tracked</span>
+            </div>
+        </div>
+
+        <div class="panel-body data-panel-toolbar">
+            <form method="get" class="documents-top-filter modern-filter-bar">
+                <div class="documents-search-box">
+                    <i class="fas fa-search"></i>
+                    <input
+                        type="text"
+                        name="search"
+                        placeholder="Search documents..."
+                        value="{{ search_query }}"
+                    >
+                </div>
+
+                <select name="status" class="documents-select">
+                    <option value="">Status: All</option>
+                    <option value="Pending" {% if status_filter == "Pending" %}selected{% endif %}>Pending</option>
+                    <option value="In Progress" {% if status_filter == "In Progress" %}selected{% endif %}>In Progress</option>
+                    <option value="Completed" {% if status_filter == "Completed" %}selected{% endif %}>Completed</option>
+                    <option value="Overdue" {% if status_filter == "Overdue" %}selected{% endif %}>Overdue</option>
+                </select>
+
+                <select name="priority" class="documents-select">
+                    <option value="">Priority: All</option>
+                    <option value="Low" {% if priority_filter == "Low" %}selected{% endif %}>Low</option>
+                    <option value="Medium" {% if priority_filter == "Medium" %}selected{% endif %}>Medium</option>
+                    <option value="High" {% if priority_filter == "High" %}selected{% endif %}>High</option>
+                </select>
+
+                <select name="department" class="documents-select">
+                    <option value="">Department: All</option>
+                    {% for department in department_options %}
+                    <option value="{{ department }}" {% if department_filter == department %}selected{% endif %}>{{ department }}</option>
+                    {% endfor %}
+                </select>
+
+                <select name="assigned_to" class="documents-select">
+                    <option value="">Assigned: All</option>
+                    {% for officer in assigned_options %}
+                    <option value="{{ officer.pk }}" {% if assigned_filter == officer.pk|stringformat:"s" %}selected{% endif %}>{{ officer.full_name }}</option>
+                    {% endfor %}
+                </select>
+
+                <input type="date" name="date_from" class="documents-select" value="{{ date_from }}" title="Received from">
+                <input type="date" name="date_to" class="documents-select" value="{{ date_to }}" title="Received to">
+
+                <select name="archive" class="documents-select">
+                    <option value="active" {% if archive_filter == "active" %}selected{% endif %}>Active only</option>
+                    <option value="archived" {% if archive_filter == "archived" %}selected{% endif %}>Archived only</option>
+                    <option value="all" {% if archive_filter == "all" %}selected{% endif %}>Active + Archived</option>
+                </select>
+
+                <button type="submit" class="documents-filter-btn">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Filter</span>
+                </button>
+
+                <a href="{% url 'documents' %}" class="documents-reset-btn">Reset</a>
+            </form>
+        </div>
+
+        <div class="table-wrap modern-table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Reference ID</th>
+                        <th>Subject</th>
+                        <th>Department</th>
+                        <th>Assigned To</th>
+                        <th>Origin</th>
+                        <th>Destination</th>
+                        <th>Priority</th>
+                        <th>Status</th>
+                        <th>Lifecycle</th>
+                        <th>Date Received</th>
+                        <th>Due Date</th>
+                        <th>Attachment</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if documents %}
+                        {% for doc in documents %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'document_detail' doc.pk %}" class="table-link strong-link">
+                                    {{ doc.reference_id }}
+                                </a>
+                            </td>
+                            <td class="subject-cell">{{ doc.subject }}</td>
+                            <td>{{ doc.department|default:"-" }}</td>
+                            <td>{% if doc.assigned_to %}{{ doc.assigned_to.full_name }}{% else %}-{% endif %}</td>
+                            <td>{{ doc.origin }}</td>
+                            <td>{{ doc.destination }}</td>
+                            <td>
+                                <span class="table-badge priority-badge
+                                    {% if doc.priority == 'High' %}priority-high
+                                    {% elif doc.priority == 'Medium' %}priority-medium
+                                    {% else %}priority-low{% endif %}">
+                                    {% if doc.priority == 'High' %}
+                                        <i class="fas fa-arrow-up"></i>
+                                    {% elif doc.priority == 'Medium' %}
+                                        <i class="fas fa-minus"></i>
+                                    {% else %}
+                                        <i class="fas fa-arrow-down"></i>
+                                    {% endif %}
+                                    {{ doc.priority }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="table-badge status-badge
+                                    {% if doc.status == 'Completed' %}status-completed
+                                    {% elif doc.status == 'Pending' %}status-pending
+                                    {% elif doc.status == 'Overdue' %}status-overdue
+                                    {% else %}status-progress{% endif %}">
+                                    <span class="status-dot"></span>
+                                    {{ doc.status }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="table-badge {% if doc.is_archived %}badge-red{% else %}badge-green{% endif %}">
+                                    {% if doc.is_archived %}Archived{% else %}Active{% endif %}
+                                </span>
+                            </td>
+                            <td>{{ doc.date_received }}</td>
+                            <td>{{ doc.due_date|default:"-" }}</td>
+                            <td>
+                                {% if doc.attachment %}
+                                    <a href="{% url 'download_document_attachment' doc.pk %}" target="_blank" class="attachment-link">
+                                        <i class="fas fa-paperclip"></i>
+                                        View
+                                    </a>
+                                {% else %}
+                                    <span class="no-attachment">-</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <div class="row-action-dropdown">
+                                    <button type="button" class="action-menu-toggle" onclick="toggleActionMenu('menu-{{ doc.pk }}')">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+
+                                    <div class="action-menu" id="menu-{{ doc.pk }}">
+                                        <a href="{% url 'document_detail' doc.pk %}" class="action-menu-item">
+                                            <i class="fas fa-eye"></i>
+                                            <span>View</span>
+                                        </a>
+
+                                        {% if permission_flags.edit_document %}
+                                        <a href="{% url 'edit_document' doc.pk %}" class="action-menu-item">
+                                            <i class="fas fa-pen"></i>
+                                            <span>Edit</span>
+                                        </a>
+                                        {% endif %}
+
+                                        {% if permission_flags.delete_document and not doc.is_archived %}
+                                        <a href="{% url 'delete_document' doc.pk %}" class="action-menu-item danger">
+                                            <i class="fas fa-box-archive"></i>
+                                            <span>Archive</span>
+                                        </a>
+                                        {% elif permission_flags.delete_document %}
+                                        <a href="{% url 'restore_document' doc.pk %}" class="action-menu-item">
+                                            <i class="fas fa-rotate-left"></i>
+                                            <span>Restore</span>
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="13" class="empty-row">No documents found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if documents.has_other_pages %}
+        <div class="pagination-wrap">
+            <div class="pagination-info">
+                Page {{ documents.number }} of {{ documents.paginator.num_pages }}
+            </div>
+
+            <div class="pagination-controls">
+                {% if documents.has_previous %}
+                    <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if assigned_filter %}&assigned_to={{ assigned_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if archive_filter %}&archive={{ archive_filter }}{% endif %}" class="pagination-btn">
+                        First
+                    </a>
+                    <a href="?page={{ documents.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if assigned_filter %}&assigned_to={{ assigned_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if archive_filter %}&archive={{ archive_filter }}{% endif %}" class="pagination-btn">
+                        Previous
+                    </a>
+                {% endif %}
+
+                <span class="pagination-current">{{ documents.number }}</span>
+
+                {% if documents.has_next %}
+                    <a href="?page={{ documents.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if assigned_filter %}&assigned_to={{ assigned_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if archive_filter %}&archive={{ archive_filter }}{% endif %}" class="pagination-btn">
+                        Next
+                    </a>
+                    <a href="?page={{ documents.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if priority_filter %}&priority={{ priority_filter }}{% endif %}{% if department_filter %}&department={{ department_filter }}{% endif %}{% if assigned_filter %}&assigned_to={{ assigned_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}{% if archive_filter %}&archive={{ archive_filter }}{% endif %}" class="pagination-btn">
+                        Last
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    function toggleActionMenu(menuId) {
+        document.querySelectorAll('.action-menu').forEach(menu => {
+            if (menu.id !== menuId) {
+                menu.classList.remove('show');
+                menu.classList.remove('open-up');
+            }
+        });
+
+        const menu = document.getElementById(menuId);
+        if (menu) {
+            const willOpen = !menu.classList.contains('show');
+            menu.classList.toggle('show');
+
+            if (willOpen) {
+                menu.classList.remove('open-up');
+
+                const rect = menu.getBoundingClientRect();
+                const spaceBelow = window.innerHeight - rect.top;
+                const menuHeight = rect.height || 140;
+
+                if (spaceBelow < menuHeight + 20) {
+                    menu.classList.add('open-up');
+                }
+            } else {
+                menu.classList.remove('open-up');
+            }
+        }
+    }
+
+    document.addEventListener('click', function(event) {
+        if (!event.target.closest('.row-action-dropdown')) {
+            document.querySelectorAll('.action-menu').forEach(menu => {
+                menu.classList.remove('show');
+                menu.classList.remove('open-up');
+            });
+        }
+    });
+</script>
+{% endblock %}

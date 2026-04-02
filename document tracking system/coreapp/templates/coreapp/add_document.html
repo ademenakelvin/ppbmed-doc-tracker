@@ -1,0 +1,495 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Add Document | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/add-document.css' %}?v=20260330d">{% endblock %}
+{% block page_title %}Add Document{% endblock %}
+{% block page_subtitle %}Register a new document.{% endblock %}
+
+{% block content %}
+<section class="document-entry-hero">
+    <div class="document-entry-copy">
+        <div class="document-entry-badge">
+            <i class="fas fa-file-circle-plus"></i>
+            <span>Document intake</span>
+        </div>
+
+        <h2>Add a new document.</h2>
+        <p>Upload the file, fill the details, and save it to the workflow.</p>
+    </div>
+
+    <div class="document-entry-points">
+        <div class="entry-point-card">
+            <div class="entry-point-icon">
+                <i class="fas fa-fingerprint"></i>
+            </div>
+            <strong>Reference ID</strong>
+            <p>Use a clear unique ID.</p>
+        </div>
+        <div class="entry-point-card">
+            <div class="entry-point-icon">
+                <i class="fas fa-route"></i>
+            </div>
+            <strong>Routing ready</strong>
+            <p>Set owner, priority, and dates.</p>
+        </div>
+        <div class="entry-point-card">
+            <div class="entry-point-icon">
+                <i class="fas fa-print"></i>
+            </div>
+            <strong>Attachment</strong>
+            <p>Scan or upload the source file.</p>
+        </div>
+    </div>
+</section>
+
+<div class="document-entry-layout">
+    <aside class="document-entry-sidebar">
+        <div class="intake-side-panel physical-flow-panel">
+            <div class="intake-side-head">
+                <span class="side-kicker">Physical letter flow</span>
+                <h3>Paper letter to system</h3>
+                <p>Use these steps when a document arrives on paper.</p>
+            </div>
+
+            <div class="physical-flow-steps">
+                <div class="physical-flow-step">
+                    <span class="physical-flow-number">1</span>
+                    <div>
+                        <strong>Receive the paper letter</strong>
+                        <p>Confirm sender, date, and reference.</p>
+                    </div>
+                </div>
+                <div class="physical-flow-step">
+                    <span class="physical-flow-number">2</span>
+                    <div>
+                        <strong>Scan or photograph it</strong>
+                        <p>Upload the scan or image.</p>
+                    </div>
+                </div>
+                <div class="physical-flow-step">
+                    <span class="physical-flow-number">3</span>
+                    <div>
+                        <strong>Fill the form</strong>
+                        <p>Type details or use scan autofill.</p>
+                    </div>
+                </div>
+                <div class="physical-flow-step">
+                    <span class="physical-flow-number">4</span>
+                    <div>
+                        <strong>Save and route it</strong>
+                        <p>Save it into the tracked workflow.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="intake-side-panel upload-panel">
+            <div class="intake-side-head">
+                <span class="side-kicker">Smart intake</span>
+                <h3>Upload and prefill</h3>
+                <p>Attach the file, then use scan autofill if needed.</p>
+            </div>
+
+            <div class="upload-dropzone">
+                <div class="upload-dropzone-icon">
+                    <i class="fas fa-cloud-arrow-up"></i>
+                </div>
+                <p>PDF, JPG, PNG, or scanned image</p>
+                <span>The same file becomes the document attachment and scan source.</span>
+            </div>
+
+            <div class="intake-side-list">
+                <div class="intake-side-item">
+                    <i class="fas fa-sparkles"></i>
+                    <span>Suggests ref, subject, and date.</span>
+                </div>
+                <div class="intake-side-item">
+                    <i class="fas fa-user-check"></i>
+                    <span>Staff still confirm before saving.</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="intake-side-panel checklist-panel">
+            <span class="side-kicker">Before saving</span>
+            <h3>Quick checks</h3>
+            <div class="intake-checklist">
+                <div class="intake-check">
+                    <i class="fas fa-circle-check"></i>
+                    <span>Reference number is unique and readable</span>
+                </div>
+                <div class="intake-check">
+                    <i class="fas fa-circle-check"></i>
+                    <span>Origin and destination reflect the actual correspondence</span>
+                </div>
+                <div class="intake-check">
+                    <i class="fas fa-circle-check"></i>
+                    <span>Priority and due date match the urgency of the task</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <div class="card document-entry-card">
+        <div class="card-header document-entry-header">
+            <div>
+                <h2>New Document Form</h2>
+                <p>Complete the form to register the document.</p>
+            </div>
+            <div class="document-entry-chip">
+                <i class="fas fa-shield-halved"></i>
+                <span>Tracked submission</span>
+            </div>
+        </div>
+
+        <div class="panel-body">
+            {% if form.non_field_errors %}
+                <div class="form-alert">
+                    {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            <form method="post" enctype="multipart/form-data" class="document-form document-entry-form" id="addDocumentForm">
+                {% csrf_token %}
+
+                <section class="form-section emphasis-section">
+                    <div class="form-section-heading">
+                        <h3>Scan and Intake</h3>
+                        <p>Attach the source file, then use autofill or manual entry.</p>
+                    </div>
+
+                    <button
+                        type="button"
+                        class="manual-intake-banner"
+                        id="manualIntakeBanner"
+                        aria-controls="{{ form.attachment.id_for_label }}"
+                        aria-expanded="false"
+                    >
+                        <div class="manual-intake-banner-icon">
+                            <i class="fas fa-envelope-open-text"></i>
+                        </div>
+                        <div>
+                            <strong>Received a manual paper letter?</strong>
+                            <p>Upload the scan here or enter the details manually.</p>
+                        </div>
+                    </button>
+
+                    <div class="manual-intake-menu" id="manualIntakeMenu" hidden>
+                        <div class="manual-intake-menu-head">
+                            <strong>Choose intake mode</strong>
+                            <p>Select how you want to start.</p>
+                        </div>
+
+                        <div class="manual-intake-actions">
+                            <button type="button" class="manual-intake-option" id="uploadScanOption">
+                                <i class="fas fa-file-arrow-up"></i>
+                                <span>Upload scanned letter</span>
+                                <small>Attach the scan or PDF.</small>
+                            </button>
+
+                            <button type="button" class="manual-intake-option" id="scanAutofillOption">
+                                <i class="fas fa-scanner"></i>
+                                <span>Upload then autofill</span>
+                                <small>Attach the file, then suggest details.</small>
+                            </button>
+
+                            <button type="button" class="manual-intake-option" id="manualEntryOption">
+                                <i class="fas fa-keyboard"></i>
+                                <span>Enter details manually</span>
+                                <small>Skip scanning and type it yourself.</small>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="attachment-intake-row">
+                        <div class="form-group full-width">
+                            <label for="{{ form.attachment.id_for_label }}">Letter Attachment</label>
+                            <div class="modern-file-input">
+                                {{ form.attachment }}
+                            </div>
+                            <div class="scan-tools">
+                                <small class="field-hint">Upload the source file first.</small>
+                                <button type="button" class="scan-autofill-btn" id="scanAutofillBtn">
+                                    <i class="fas fa-scanner"></i>
+                                    <span>Scan and Autofill</span>
+                                </button>
+                            </div>
+                            <div class="scan-feedback" id="scanFeedback" hidden></div>
+                            {% if form.attachment.errors %}<small class="field-error">{{ form.attachment.errors|striptags }}</small>{% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-heading">
+                        <h3>Core Details</h3>
+                        <p>Enter the main record details.</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group form-group-featured">
+                            <label for="{{ form.reference_id.id_for_label }}">Reference ID</label>
+                            {{ form.reference_id }}
+                            {% if form.reference_id.errors %}<small class="field-error">{{ form.reference_id.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group form-group-featured">
+                            <label for="{{ form.subject.id_for_label }}">Subject</label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}<small class="field-error">{{ form.subject.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.direction.id_for_label }}">Direction</label>
+                            {{ form.direction }}
+                            {% if form.direction.errors %}<small class="field-error">{{ form.direction.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.document_type.id_for_label }}">Document Type</label>
+                            {{ form.document_type }}
+                            {% if form.document_type.errors %}<small class="field-error">{{ form.document_type.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.department.id_for_label }}">Owning Department</label>
+                            {{ form.department }}
+                            {% if form.department.errors %}<small class="field-error">{{ form.department.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="{{ form.description.id_for_label }}">Description</label>
+                            {{ form.description }}
+                            {% if form.description.errors %}<small class="field-error">{{ form.description.errors|striptags }}</small>{% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <section class="form-section">
+                    <div class="form-section-heading">
+                        <h3>Routing and Timeline</h3>
+                        <p>Set owner, priority, and dates.</p>
+                    </div>
+
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="{{ form.origin.id_for_label }}">Origin</label>
+                            {{ form.origin }}
+                            {% if form.origin.errors %}<small class="field-error">{{ form.origin.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.destination.id_for_label }}">Destination</label>
+                            {{ form.destination }}
+                            {% if form.destination.errors %}<small class="field-error">{{ form.destination.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        {% if role == "Director" or role == "Deputy Director" %}
+                        <div class="form-group">
+                            <label for="{{ form.assigned_to.id_for_label }}">Assigned To</label>
+                            {{ form.assigned_to }}
+                            {% if form.assigned_to.errors %}<small class="field-error">{{ form.assigned_to.errors|striptags }}</small>{% endif %}
+                        </div>
+                        {% else %}
+                        <div class="form-group">
+                            <label>Assigned To</label>
+                            <input type="text" class="form-control" value="{{ staff_user.full_name }}" readonly>
+                        </div>
+                        {% endif %}
+
+                        <div class="form-group">
+                            <label for="{{ form.priority.id_for_label }}">Priority</label>
+                            {{ form.priority }}
+                            {% if form.priority.errors %}<small class="field-error">{{ form.priority.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.status.id_for_label }}">Status</label>
+                            {{ form.status }}
+                            {% if form.status.errors %}<small class="field-error">{{ form.status.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.date_received.id_for_label }}">Date Received</label>
+                            {{ form.date_received }}
+                            <small class="field-hint">Use the day the physical letter arrived in the office or registry.</small>
+                            {% if form.date_received.errors %}<small class="field-error">{{ form.date_received.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group">
+                            <label for="{{ form.due_date.id_for_label }}">Due Date</label>
+                            {{ form.due_date }}
+                            {% if form.due_date.errors %}<small class="field-error">{{ form.due_date.errors|striptags }}</small>{% endif %}
+                        </div>
+                    </div>
+                </section>
+
+                <div class="form-actions document-entry-actions">
+                    <div class="document-action-note">
+                        <i class="fas fa-lock"></i>
+                        <span>This saves directly into the tracked workflow.</span>
+                    </div>
+                    <div class="document-action-buttons">
+                        <a href="{% url 'documents' %}" class="document-cancel-link">Cancel</a>
+                        <button type="submit" class="save-btn document-save-btn">Save Document</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('addDocumentForm');
+        const scanButton = document.getElementById('scanAutofillBtn');
+        const feedback = document.getElementById('scanFeedback');
+        const attachmentInput = document.getElementById('{{ form.attachment.id_for_label }}');
+        const dateReceivedInput = document.getElementById('{{ form.date_received.id_for_label }}');
+        const manualIntakeBanner = document.getElementById('manualIntakeBanner');
+        const manualIntakeMenu = document.getElementById('manualIntakeMenu');
+        const uploadScanOption = document.getElementById('uploadScanOption');
+        const scanAutofillOption = document.getElementById('scanAutofillOption');
+        const manualEntryOption = document.getElementById('manualEntryOption');
+        const referenceInput = document.getElementById('{{ form.reference_id.id_for_label }}');
+
+        if (!form || !scanButton || !feedback || !attachmentInput) return;
+
+        if (dateReceivedInput && !dateReceivedInput.value) {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            dateReceivedInput.value = `${year}-${month}-${day}`;
+        }
+
+        function toggleManualIntakeMenu(forceOpen) {
+            if (!manualIntakeBanner || !manualIntakeMenu) return;
+
+            const shouldOpen = typeof forceOpen === 'boolean'
+                ? forceOpen
+                : manualIntakeMenu.hidden;
+
+            manualIntakeMenu.hidden = !shouldOpen;
+            manualIntakeBanner.setAttribute('aria-expanded', shouldOpen ? 'true' : 'false');
+            manualIntakeBanner.classList.toggle('is-open', shouldOpen);
+        }
+
+        if (manualIntakeBanner && manualIntakeMenu) {
+            manualIntakeBanner.addEventListener('click', function () {
+                toggleManualIntakeMenu();
+            });
+        }
+
+        if (uploadScanOption) {
+            uploadScanOption.addEventListener('click', function () {
+                toggleManualIntakeMenu(false);
+                attachmentInput.click();
+                attachmentInput.focus();
+            });
+        }
+
+        if (scanAutofillOption) {
+            scanAutofillOption.addEventListener('click', function () {
+                toggleManualIntakeMenu(false);
+                setFeedback('Choose the scanned file first, then click "Scan and Autofill".', 'info');
+                attachmentInput.click();
+                attachmentInput.focus();
+            });
+        }
+
+        if (manualEntryOption) {
+            manualEntryOption.addEventListener('click', function () {
+                toggleManualIntakeMenu(false);
+                if (referenceInput) {
+                    referenceInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    referenceInput.focus();
+                }
+            });
+        }
+
+        const fillableFields = [
+            'reference_id',
+            'subject',
+            'origin',
+            'destination',
+            'direction',
+            'document_type',
+            'date_received',
+            'description'
+        ];
+
+        function setFeedback(message, type) {
+            feedback.hidden = false;
+            feedback.className = 'scan-feedback ' + type;
+            feedback.innerHTML = message;
+        }
+
+        function applySuggestions(data) {
+            fillableFields.forEach(function (name) {
+                const input = form.querySelector('[name="' + name + '"]');
+                if (!input || !(name in data)) return;
+
+                const currentValue = (input.value || '').trim();
+                if (currentValue) return;
+
+                input.value = data[name];
+                input.dispatchEvent(new Event('change', { bubbles: true }));
+            });
+        }
+
+        scanButton.addEventListener('click', async function () {
+            if (!attachmentInput.files.length) {
+                setFeedback('Choose a scanned PDF or image first, then run autofill.', 'error');
+                return;
+            }
+
+            scanButton.disabled = true;
+            scanButton.classList.add('is-loading');
+            scanButton.innerHTML = '<span class="btn-spinner"></span><span>Reading scan...</span>';
+            setFeedback('Extracting text from the uploaded scan and preparing suggestions...', 'info');
+
+            try {
+                const payload = new FormData();
+                payload.append('attachment', attachmentInput.files[0]);
+
+                const csrfToken = form.querySelector('input[name="csrfmiddlewaretoken"]').value;
+                const response = await fetch("{% url 'extract_document_scan' %}", {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': csrfToken
+                    },
+                    body: payload
+                });
+
+                const result = await response.json();
+
+                if (!response.ok || !result.success) {
+                    setFeedback(result.error || 'The scan could not be processed.', 'error');
+                    return;
+                }
+
+                applySuggestions(result.data || {});
+
+                let message = result.message || 'Scan complete.';
+                if (result.preview) {
+                    message += '<div class="scan-preview"><strong>Preview:</strong> ' + result.preview + '</div>';
+                }
+
+                setFeedback(message, 'success');
+            } catch (error) {
+                setFeedback('The scan request failed. Please try again or fill the form manually.', 'error');
+            } finally {
+                scanButton.disabled = false;
+                scanButton.classList.remove('is-loading');
+                scanButton.innerHTML = '<i class="fas fa-scanner"></i><span>Scan and Autofill</span>';
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,250 @@
+.edit-document-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(260px, 340px);
+    gap: 24px;
+    padding: 28px;
+    margin-bottom: 24px;
+    border-radius: 28px;
+    background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.22), transparent 30%),
+        linear-gradient(135deg, #0f172a 0%, #123a63 48%, #1d4ed8 100%);
+    color: #ffffff;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.16);
+}
+
+.edit-document-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 16px;
+}
+
+.edit-document-copy h2 {
+    font-size: clamp(2rem, 3vw, 3rem);
+    line-height: 1.05;
+    letter-spacing: -0.04em;
+    max-width: 13ch;
+    margin-bottom: 14px;
+}
+
+.edit-document-copy p {
+    color: rgba(255, 255, 255, 0.82);
+    line-height: 1.75;
+}
+
+.edit-document-side {
+    display: grid;
+    gap: 14px;
+    align-content: center;
+}
+
+.document-side-card {
+    padding: 20px;
+    border-radius: 22px;
+    background: rgba(255, 255, 255, 0.14);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.document-side-card.subtle {
+    background: rgba(15, 23, 42, 0.22);
+}
+
+.document-side-card strong {
+    display: block;
+    margin-bottom: 8px;
+}
+
+.document-side-card p {
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.edit-document-card {
+    border-radius: 26px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06);
+}
+
+.edit-document-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.edit-document-header p {
+    color: #64748b;
+    margin-top: 6px;
+}
+
+.document-edit-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 11px 14px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.edit-document-form {
+    display: grid;
+    gap: 22px;
+}
+
+.form-section {
+    padding: 24px;
+    border-radius: 22px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border: 1px solid #e8eef6;
+}
+
+.form-section-heading {
+    margin-bottom: 18px;
+}
+
+.form-section-heading h3 {
+    font-size: 1.15rem;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.form-section-heading p {
+    color: #64748b;
+    line-height: 1.6;
+}
+
+.edit-document-form .form-control {
+    border: 1px solid #dbe5f0;
+    border-radius: 16px;
+    padding: 14px 16px;
+    background: #ffffff;
+}
+
+.edit-document-form textarea.form-control {
+    min-height: 120px;
+}
+
+.edit-document-form .form-control:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.field-hint {
+    display: block;
+    margin-top: 8px;
+    color: #64748b;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.edit-document-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
+}
+
+.document-cancel-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 16px;
+    border-radius: 16px;
+    border: 1px solid #dbe5f0;
+    background: #ffffff;
+    color: #334155;
+    font-weight: 700;
+}
+
+.document-save-btn {
+    min-width: 180px;
+    border-radius: 16px;
+    box-shadow: 0 16px 28px rgba(37, 99, 235, 0.18);
+}
+
+body.theme-dark .edit-document-card {
+    border-color: rgba(148, 163, 184, 0.18);
+    background: linear-gradient(180deg, rgba(15, 23, 42, 0.96) 0%, rgba(15, 23, 42, 0.88) 100%);
+    box-shadow: 0 18px 34px rgba(2, 6, 23, 0.34);
+}
+
+body.theme-dark .edit-document-card .panel-body,
+body.theme-dark .edit-document-header {
+    background: transparent !important;
+}
+
+body.theme-dark .edit-document-header h2,
+body.theme-dark .form-section-heading h3 {
+    color: #f8fbff;
+}
+
+body.theme-dark .edit-document-header p,
+body.theme-dark .form-section-heading p,
+body.theme-dark .field-hint {
+    color: #b8c7dc;
+}
+
+body.theme-dark .document-edit-chip {
+    background: rgba(59, 130, 246, 0.16);
+    color: #bfdbfe;
+}
+
+body.theme-dark .form-section {
+    background: linear-gradient(180deg, rgba(17, 29, 52, 0.98) 0%, rgba(15, 23, 42, 0.92) 100%) !important;
+    border: 1px solid rgba(148, 163, 184, 0.16) !important;
+}
+
+body.theme-dark .edit-document-form .form-control,
+body.theme-dark .document-cancel-link {
+    background: rgba(15, 23, 42, 0.92) !important;
+    border-color: rgba(148, 163, 184, 0.18) !important;
+    color: #f8fbff;
+}
+
+body.theme-dark .edit-document-form .form-control:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+}
+
+body.theme-dark .form-group label {
+    color: #94a3b8;
+}
+
+body.theme-dark .document-cancel-link {
+    color: #dbeafe;
+}
+
+@media (max-width: 1100px) {
+    .edit-document-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .edit-document-copy h2 {
+        max-width: none;
+    }
+}
+
+@media (max-width: 700px) {
+    .edit-document-hero,
+    .form-section {
+        padding: 20px;
+    }
+
+    .edit-document-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .edit-document-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+    }
+}

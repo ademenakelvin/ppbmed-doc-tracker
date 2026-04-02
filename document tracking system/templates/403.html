@@ -1,0 +1,72 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>403 Permission Denied | PPBMED</title>
+    <link rel="stylesheet" href="{% static 'coreapp/css/error-page.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+    <div class="error-shell">
+        <section class="error-hero">
+            <div class="error-badge">
+                <i class="fas fa-shield-halved"></i>
+                <span>Access protection</span>
+            </div>
+            <h1>You do not have permission to open this page.</h1>
+            <p>This area is restricted by role and workflow access rules inside the PPBMED Document Tracking System. The page may require a different staff role, an active linked profile, or document-level permission.</p>
+
+            <div class="error-highlights">
+                <div class="error-highlight">
+                    <i class="fas fa-user-lock"></i>
+                    <span>Some pages are limited to directors, deputies, or assigned staff only.</span>
+                </div>
+                <div class="error-highlight">
+                    <i class="fas fa-route"></i>
+                    <span>Routing, editing, and export actions can also depend on document ownership.</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="error-card">
+            <div class="error-card-top">
+                <div class="error-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div>
+                    <div class="error-code">403 Error</div>
+                    <h2 class="error-title">Permission Denied</h2>
+                </div>
+            </div>
+
+            <p class="error-text">
+                If you expected to reach this page, your account may need the correct role assignment or active staff profile. Otherwise, return to a page you already have access to and continue from there.
+            </p>
+
+            <div class="error-help">
+                <div class="error-help-item">
+                    <i class="fas fa-house"></i>
+                    <span>Go back to the dashboard to continue working safely.</span>
+                </div>
+                <div class="error-help-item">
+                    <i class="fas fa-user-gear"></i>
+                    <span>Contact the system administrator if your permissions seem incorrect.</span>
+                </div>
+            </div>
+
+            <div class="error-actions">
+                <a href="/" class="error-home-btn">
+                    <i class="fas fa-house"></i>
+                    <span>Back to Dashboard</span>
+                </a>
+                <a href="javascript:history.back()" class="error-back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Go Back</span>
+                </a>
+            </div>
+        </section>
+    </div>
+</body>
+</html>

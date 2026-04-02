@@ -1,0 +1,697 @@
+.settings-shell {
+    max-width: 1320px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.settings-hero {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(260px, 320px);
+    gap: 24px;
+    padding: 30px;
+    margin-bottom: 26px;
+    border-radius: 32px;
+    background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 30%),
+        radial-gradient(circle at bottom right, rgba(18, 58, 99, 0.14), transparent 28%),
+        linear-gradient(135deg, #fbfdff 0%, #eef5ff 46%, #f8fbff 100%);
+    color: #0f172a;
+    box-shadow: 0 18px 42px rgba(15, 23, 42, 0.08);
+    border: 1px solid #e8eef9;
+}
+
+.settings-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid #e4eaf5;
+    color: #1d4ed8;
+    font-size: 13px;
+    font-weight: 800;
+    margin-bottom: 16px;
+}
+
+.settings-hero h2 {
+    font-size: clamp(2.1rem, 3.5vw, 3.3rem);
+    line-height: 0.98;
+    letter-spacing: -0.05em;
+    max-width: 12ch;
+    margin-bottom: 14px;
+    color: #0f172a;
+}
+
+.settings-hero p {
+    color: #526277;
+    line-height: 1.8;
+    max-width: 62ch;
+}
+
+.settings-hero-panels {
+    display: grid;
+    align-content: center;
+}
+
+.settings-pulse-card {
+    padding: 22px;
+    border-radius: 24px;
+    background: rgba(255, 255, 255, 0.82);
+    border: 1px solid #e4eaf5;
+    box-shadow: 0 16px 32px rgba(15, 23, 42, 0.06);
+}
+
+.settings-pulse-label {
+    display: block;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #94a3b8;
+    margin-bottom: 8px;
+}
+
+.settings-pulse-card strong {
+    display: block;
+    font-size: 1.5rem;
+    margin-bottom: 6px;
+}
+
+.settings-pulse-card p {
+    color: #64748b;
+}
+
+.settings-workspace {
+    display: grid;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.settings-sidebar {
+    display: grid;
+    gap: 16px;
+    position: sticky;
+    top: 106px;
+}
+
+.settings-profile-card,
+.settings-nav-card,
+.settings-metric-card,
+.settings-stack-card {
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+    border: 1px solid #e5ecf6;
+    box-shadow: 0 16px 34px rgba(15, 23, 42, 0.06);
+}
+
+.settings-profile-card,
+.settings-nav-card,
+.settings-stack-card {
+    border-radius: 28px;
+}
+
+.settings-profile-card {
+    padding: 24px 22px;
+    text-align: center;
+}
+
+.settings-avatar-wrap {
+    position: relative;
+    width: fit-content;
+    margin: 0 auto 14px;
+}
+
+.settings-avatar {
+    width: 86px;
+    height: 86px;
+    border-radius: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #123a63 0%, #2563eb 100%);
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 800;
+    box-shadow: 0 16px 26px rgba(96, 165, 250, 0.22);
+}
+
+.settings-online-dot {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #22c55e;
+    border: 3px solid #ffffff;
+}
+
+.settings-profile-card h3 {
+    font-size: 1.25rem;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.settings-profile-card p {
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.settings-profile-chip {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    color: #1d4ed8;
+    font-weight: 800;
+    font-size: 13px;
+}
+
+.settings-nav-card {
+    padding: 16px;
+    display: grid;
+    gap: 10px;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 20px;
+    color: #475569;
+    background: #ffffff;
+    border: 1px solid #edf2f8;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.settings-nav-item i {
+    width: 40px;
+    height: 40px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    color: #64748b;
+}
+
+.settings-nav-item strong {
+    display: block;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.settings-nav-item span {
+    display: block;
+    font-size: 13px;
+    color: #64748b;
+}
+
+.settings-nav-item.active {
+    background: linear-gradient(135deg, #eff6ff 0%, #f8fbff 100%);
+    border-color: #bfdbfe;
+}
+
+.settings-nav-item:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 12px 22px rgba(15, 23, 42, 0.06);
+    border-color: #cfe0f7;
+}
+
+.settings-nav-item.active i {
+    background: linear-gradient(135deg, #123a63 0%, #2563eb 100%);
+    color: #ffffff;
+}
+
+.settings-metric-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+.settings-metric-card {
+    padding: 18px 14px;
+    border-radius: 22px;
+    text-align: center;
+    text-decoration: none;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.settings-metric-card strong {
+    display: block;
+    font-size: 1.1rem;
+    color: #0f172a;
+    margin-bottom: 4px;
+}
+
+.settings-metric-card p {
+    color: #64748b;
+    font-size: 13px;
+}
+
+.settings-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 18px 28px rgba(15, 23, 42, 0.08);
+    border-color: #bfdbfe;
+}
+
+.metric-icon {
+    width: 42px;
+    height: 42px;
+    margin: 0 auto 12px;
+    border-radius: 16px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+}
+
+.settings-metric-card.pink .metric-icon {
+    background: linear-gradient(135deg, #123a63 0%, #2563eb 100%);
+}
+
+.settings-metric-card.blue .metric-icon {
+    background: linear-gradient(135deg, #60a5fa 0%, #2563eb 100%);
+}
+
+.settings-metric-card.amber .metric-icon {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+}
+
+.settings-main {
+    display: grid;
+    gap: 22px;
+}
+
+.settings-stack-card[hidden] {
+    display: none;
+}
+
+#account-settings,
+#preferences-settings,
+#security-settings,
+#role-access-settings,
+#email-notifications-setting,
+#sound-alerts-setting,
+#dark-mode-setting {
+    scroll-margin-top: 110px;
+}
+
+.settings-stack-card {
+    border-radius: 30px;
+    padding: 24px;
+}
+
+.preferences-card {
+    background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 28%),
+        linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.role-access-card {
+    background:
+        radial-gradient(circle at top left, rgba(16, 185, 129, 0.09), transparent 28%),
+        linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.settings-section-head {
+    margin-bottom: 18px;
+}
+
+.section-kicker {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    border-radius: 999px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 10px;
+}
+
+.settings-section-head h2 {
+    font-size: 1.65rem;
+    letter-spacing: -0.04em;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+
+.settings-section-head p {
+    color: #64748b;
+    line-height: 1.7;
+    max-width: 66ch;
+}
+
+.settings-form-fields,
+.security-fields {
+    gap: 18px;
+}
+
+.settings-stack-card .form-control {
+    border-radius: 18px;
+    border: 1px solid #dbe5f0;
+    background: #ffffff;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.settings-stack-card .form-control:focus {
+    border-color: #60a5fa;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.modern-settings-list {
+    display: grid;
+    gap: 14px;
+}
+
+.modern-setting-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 18px 20px;
+    border-radius: 22px;
+    border: 1px solid #e8eef6;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+.modern-setting-item h4,
+.settings-security-item h4 {
+    font-size: 1rem;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.modern-setting-item p,
+.settings-security-item p {
+    color: #64748b;
+    line-height: 1.65;
+}
+
+.static-badge {
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%) !important;
+    color: #1d4ed8 !important;
+    border: 0 !important;
+}
+
+.static-badge.secondary {
+    color: #2563eb !important;
+}
+
+.modern-switch {
+    flex-shrink: 0;
+}
+
+.settings-security-panel {
+    margin-top: 16px;
+    padding: 18px;
+    border-radius: 22px;
+    border: 1px solid #e8eef6;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+}
+
+.settings-security-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+.role-access-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-top: 10px;
+    margin-bottom: 18px;
+    padding: 18px 20px;
+    border-radius: 22px;
+    border: 1px solid #e8eef6;
+    background: linear-gradient(135deg, #eff6ff 0%, #f8fbff 100%);
+}
+
+.role-access-label {
+    display: inline-block;
+    margin-bottom: 8px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.role-access-hero strong {
+    display: block;
+    font-size: 1.5rem;
+    color: #0f172a;
+    margin-bottom: 6px;
+}
+
+.role-access-hero p {
+    color: #64748b;
+    line-height: 1.7;
+}
+
+.role-access-list {
+    display: grid;
+    gap: 14px;
+}
+
+.role-access-item {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    gap: 14px;
+    align-items: start;
+    padding: 18px 20px;
+    border-radius: 22px;
+    border: 1px solid #e8eef6;
+    background: rgba(255, 255, 255, 0.92);
+}
+
+.role-access-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #059669 0%, #34d399 100%);
+    color: #ffffff;
+    box-shadow: 0 12px 22px rgba(16, 185, 129, 0.18);
+}
+
+.role-access-item p {
+    color: #334155;
+    line-height: 1.7;
+}
+
+.governance-panel {
+    margin-top: 22px;
+}
+
+.governance-item {
+    grid-template-columns: 42px minmax(0, 1fr) auto;
+    align-items: center;
+}
+
+.governance-scope {
+    display: inline-block;
+    margin: 4px 0 6px;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+}
+
+.settings-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 20px;
+    padding-top: 16px;
+}
+
+.settings-action-row.compact-row {
+    justify-content: flex-start;
+}
+
+.settings-action-note {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: #64748b;
+    line-height: 1.6;
+    font-size: 14px;
+}
+
+.settings-action-note i {
+    color: #2563eb;
+}
+
+.settings-primary-btn,
+.settings-secondary-btn,
+.settings-action-btn {
+    min-width: 170px;
+    padding: 14px 18px;
+    border-radius: 18px;
+    font-weight: 800;
+}
+
+.settings-primary-btn,
+.settings-action-btn {
+    border: none;
+    background: linear-gradient(135deg, #123a63 0%, #2563eb 100%);
+    color: #ffffff;
+    box-shadow: 0 16px 28px rgba(37, 99, 235, 0.2);
+}
+
+.settings-secondary-btn {
+    border: 1px solid #dbe5f0;
+    background: #ffffff;
+    color: #64748b;
+    cursor: pointer;
+}
+
+.settings-list {
+    display: grid;
+    gap: 14px;
+}
+
+.setting-item {
+    border-radius: 20px;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 58px;
+    height: 32px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    inset: 0;
+    cursor: pointer;
+    background: #dbe5f0;
+    transition: 0.25s ease;
+    border-radius: 999px;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 24px;
+    width: 24px;
+    left: 4px;
+    top: 4px;
+    background: white;
+    transition: 0.25s ease;
+    border-radius: 50%;
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
+}
+
+.switch input:checked + .slider {
+    background: linear-gradient(135deg, #123a63 0%, #2563eb 100%);
+}
+
+.switch input:checked + .slider:before {
+    transform: translateX(26px);
+}
+
+.field-error {
+    display: block;
+    margin-top: 8px;
+    color: #b91c1c;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+@media (max-width: 1180px) {
+    .settings-workspace {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-sidebar {
+        position: static;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .settings-profile-card {
+        grid-column: span 2;
+    }
+}
+
+@media (max-width: 980px) {
+    .settings-hero {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-hero h2 {
+        max-width: none;
+    }
+}
+
+@media (max-width: 760px) {
+    .settings-hero,
+    .settings-stack-card,
+    .settings-profile-card,
+    .settings-nav-card {
+        padding: 20px;
+    }
+
+    .settings-sidebar {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-profile-card {
+        grid-column: auto;
+    }
+
+    .settings-metric-row {
+        grid-template-columns: 1fr;
+    }
+
+    .modern-setting-item,
+    .settings-security-item,
+    .role-access-hero,
+    .settings-action-row {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .role-access-item {
+        grid-template-columns: 1fr;
+    }
+
+    .governance-item {
+        grid-template-columns: 1fr;
+    }
+
+    .settings-primary-btn,
+    .settings-secondary-btn,
+    .settings-action-btn {
+        width: 100%;
+    }
+
+    .settings-action-row.compact-row {
+        align-items: stretch;
+    }
+}

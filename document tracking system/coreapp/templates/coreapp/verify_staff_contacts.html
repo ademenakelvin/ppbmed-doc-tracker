@@ -1,0 +1,91 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Verify Staff Contacts | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/staff-form.css' %}?v=20260330e">{% endblock %}
+{% block page_title %}Verify Staff Contacts{% endblock %}
+{% block page_subtitle %}Confirm email and phone OTP codes before the staff record is created.{% endblock %}
+
+{% block content %}
+<section class="staff-form-hero">
+    <div class="staff-form-copy">
+        <div class="staff-form-badge">
+            <i class="fas fa-shield-check"></i>
+            <span>Verification required</span>
+        </div>
+        <h2>Confirm both contact channels before onboarding {{ pending_staff.full_name }}.</h2>
+        <p>The staff record will only be saved after the email OTP and the phone OTP are entered correctly.</p>
+    </div>
+    <div class="staff-form-side">
+        <div class="staff-side-card">
+            <strong>Email target</strong>
+            <p>{{ pending_staff.email }}</p>
+        </div>
+        <div class="staff-side-card subtle">
+            <strong>Phone target</strong>
+            <p>{{ pending_staff.phone_number }}</p>
+        </div>
+    </div>
+</section>
+
+<div class="card staff-form-card">
+    <div class="card-header staff-form-header">
+        <div>
+            <h2>Enter Verification Codes</h2>
+            <p>Use the codes sent to the staff member’s email and phone number.</p>
+        </div>
+        <div class="staff-form-chip">
+            <i class="fas fa-key"></i>
+            <span>OTP check</span>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        {% if verification_errors %}
+            <div class="form-alert">
+                {% for error in verification_errors %}
+                    <div>{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" class="document-form staff-form-layout">
+            {% csrf_token %}
+
+            <section class="form-section">
+                <div class="form-section-heading">
+                    <h3>Verification Codes</h3>
+                    <p>Both OTPs must match before the new staff profile is committed to the system.</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="id_email_code">Email OTP</label>
+                        <input type="text" name="email_code" id="id_email_code" class="form-control" maxlength="6" inputmode="numeric" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="id_phone_code">Phone OTP</label>
+                        <input type="text" name="phone_code" id="id_phone_code" class="form-control" maxlength="6" inputmode="numeric" required>
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label class="checkbox-tile">
+                            <input type="checkbox" checked disabled>
+                            <span>
+                                <strong>Pending verification for {{ pending_staff.full_name }}</strong>
+                                <small>Role: {{ pending_staff.role }}{% if pending_staff.department %} | Department: {{ pending_staff.department }}{% endif %}</small>
+                            </span>
+                        </label>
+                    </div>
+                </div>
+            </section>
+
+            <div class="form-actions staff-form-actions">
+                <a href="{% url 'add_staff' %}" class="staff-cancel-link">Back</a>
+                <button type="submit" class="save-btn staff-save-btn">Verify And Create Staff</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

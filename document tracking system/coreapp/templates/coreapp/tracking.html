@@ -1,0 +1,169 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Tracking | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}">{% endblock %}
+{% block page_title %}Tracking History{% endblock %}
+{% block page_subtitle %}Routing history and movement logs.{% endblock %}
+
+{% block content %}
+<div class="records-page-shell">
+    <section class="records-workspace-hero">
+        <div class="records-workspace-copy">
+            <div class="records-badge"><i class="fas fa-route"></i><span>Movement history</span></div>
+            <h2>Track every handoff in one place.</h2>
+            <p>Review who sent it, who received it, and what changed.</p>
+        </div>
+
+        <div class="records-workspace-side">
+            <div class="records-hero-summary">
+                <span class="records-hero-summary-label">Forwarded</span>
+                <strong>{{ tracking_forwarded_count }}</strong>
+                <p>action{{ tracking_forwarded_count|pluralize }} recorded.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="documents-summary-grid">
+        <div class="mini-stat-card blue">
+            <div class="mini-stat-icon"><i class="fas fa-route"></i></div>
+            <div class="mini-stat-text">
+                <p>Total Actions</p>
+                <h3>{{ tracking_total_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card orange">
+            <div class="mini-stat-icon"><i class="fas fa-user-check"></i></div>
+            <div class="mini-stat-text">
+                <p>Assigned</p>
+                <h3>{{ tracking_assigned_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card blue">
+            <div class="mini-stat-icon"><i class="fas fa-share"></i></div>
+            <div class="mini-stat-text">
+                <p>Forwarded</p>
+                <h3>{{ tracking_forwarded_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card green">
+            <div class="mini-stat-icon"><i class="fas fa-circle-check"></i></div>
+            <div class="mini-stat-text">
+                <p>Completed</p>
+                <h3>{{ tracking_completed_count }}</h3>
+            </div>
+        </div>
+    </section>
+
+    <div class="card records-card data-panel-card">
+        <div class="card-header records-card-header data-panel-header">
+            <div>
+                <span class="records-section-eyebrow">History</span>
+                <h2>All routing history</h2>
+            </div>
+            <span class="data-panel-note">{{ tracking_total_count }} movement logs</span>
+        </div>
+
+        <div class="panel-body data-panel-toolbar">
+            <form method="get" class="documents-top-filter modern-filter-bar tracking-filter-bar">
+                <div class="documents-search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" placeholder="Search tracking history..." value="{{ search_query }}">
+                </div>
+
+                <select name="action" class="documents-select">
+                    <option value="">Action: All</option>
+                    <option value="Assigned" {% if action_filter == "Assigned" %}selected{% endif %}>Assigned</option>
+                    <option value="Forwarded" {% if action_filter == "Forwarded" %}selected{% endif %}>Forwarded</option>
+                    <option value="Returned" {% if action_filter == "Returned" %}selected{% endif %}>Returned</option>
+                    <option value="Completed" {% if action_filter == "Completed" %}selected{% endif %}>Completed</option>
+                </select>
+
+                <button type="submit" class="documents-filter-btn">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Filter</span>
+                </button>
+
+                <a href="{% url 'tracking' %}" class="documents-reset-btn">Reset</a>
+            </form>
+        </div>
+
+        <div class="table-wrap modern-table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Reference ID</th>
+                        <th>Subject</th>
+                        <th>From Officer</th>
+                        <th>To Officer</th>
+                        <th>Action</th>
+                        <th>Note</th>
+                        <th>Attachment</th>
+                        <th>Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if tracking_history %}
+                        {% for item in tracking_history %}
+                        <tr>
+                            <td><a href="{% url 'document_detail' item.document.pk %}" class="table-link strong-link">{{ item.document.reference_id }}</a></td>
+                            <td>{{ item.document.subject }}</td>
+                            <td>{% if item.from_officer %}{{ item.from_officer.full_name }}{% else %}-{% endif %}</td>
+                            <td>{% if item.to_officer %}{{ item.to_officer.full_name }}{% else %}-{% endif %}</td>
+                            <td>
+                                <span class="table-badge status-badge
+                                    {% if item.action == 'Completed' %}status-completed
+                                    {% elif item.action == 'Returned' %}status-overdue
+                                    {% elif item.action == 'Assigned' %}status-pending
+                                    {% else %}status-progress{% endif %}">
+                                    <span class="status-dot"></span>
+                                    {{ item.action }}
+                                </span>
+                            </td>
+                            <td>{{ item.note|default:"-" }}</td>
+                            <td>
+                                {% if item.attachment %}
+                                    <a href="{% url 'download_routing_attachment' item.pk %}" target="_blank" class="attachment-link">
+                                        <i class="fas fa-paperclip"></i>
+                                        View
+                                    </a>
+                                {% else %}
+                                    <span class="no-attachment">-</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ item.action_date }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="8" class="empty-row">No routing history found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if tracking_history.has_other_pages %}
+        <div class="pagination-wrap">
+            <div class="pagination-info">Page {{ tracking_history.number }} of {{ tracking_history.paginator.num_pages }}</div>
+            <div class="pagination-controls">
+                {% if tracking_history.has_previous %}
+                    <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}" class="pagination-btn">First</a>
+                    <a href="?page={{ tracking_history.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}" class="pagination-btn">Previous</a>
+                {% endif %}
+
+                <span class="pagination-current">{{ tracking_history.number }}</span>
+
+                {% if tracking_history.has_next %}
+                    <a href="?page={{ tracking_history.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}" class="pagination-btn">Next</a>
+                    <a href="?page={{ tracking_history.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if action_filter %}&action={{ action_filter }}{% endif %}" class="pagination-btn">Last</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

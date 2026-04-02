@@ -1,0 +1,376 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Settings | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/settings-page.css' %}?v=20260330b">{% endblock %}
+{% block page_title %}Settings{% endblock %}
+{% block page_subtitle %}Account, preferences, and security.{% endblock %}
+
+{% block content %}
+<div class="settings-workspace settings-shell">
+    <aside class="settings-sidebar">
+        <div class="settings-profile-card">
+            <div class="settings-avatar-wrap">
+                <div class="settings-avatar">{% if staff_user %}{{ staff_user.full_name|slice:':1'|upper }}{% else %}G{% endif %}</div>
+                <span class="settings-online-dot"></span>
+            </div>
+            <h3>{% if staff_user %}{{ staff_user.full_name }}{% else %}Guest User{% endif %}</h3>
+            <p>{% if staff_user %}{{ staff_user.role }}{% if staff_user.department %} / {{ staff_user.department }}{% endif %}{% else %}General{% endif %}</p>
+            <div class="settings-profile-chip">PPBMED Workspace</div>
+        </div>
+
+        <nav class="settings-nav-card">
+            <a href="#account-settings" class="settings-nav-item active" data-settings-target="account-settings">
+                <i class="fas fa-user"></i>
+                <div>
+                    <strong>Account</strong>
+                    <span>Profile and identity</span>
+                </div>
+            </a>
+            <a href="#preferences-settings" class="settings-nav-item" data-settings-target="preferences-settings">
+                <i class="fas fa-bell"></i>
+                <div>
+                    <strong>Preferences</strong>
+                    <span>Alerts and workspace behavior</span>
+                </div>
+            </a>
+            <a href="#security-settings" class="settings-nav-item" data-settings-target="security-settings">
+                <i class="fas fa-shield-halved"></i>
+                <div>
+                    <strong>Security</strong>
+                    <span>Password and linked access</span>
+                </div>
+            </a>
+            <a href="#role-access-settings" class="settings-nav-item" data-settings-target="role-access-settings">
+                <i class="fas fa-user-shield"></i>
+                <div>
+                    <strong>Role Access</strong>
+                    <span>What your role can use</span>
+                </div>
+            </a>
+        </nav>
+
+    </aside>
+
+    <div class="settings-main">
+        <section class="settings-stack-card" id="account-settings">
+            <div class="settings-section-head">
+                <div>
+                    <span class="section-kicker">Account settings</span>
+                    <h2>Profile details</h2>
+                    <p>Keep your staff details current.</p>
+                </div>
+            </div>
+
+            <form method="post" class="document-form settings-form-grid">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="profile">
+
+                <div class="form-grid settings-form-fields">
+                    <div class="form-group">
+                        <label for="{{ profile_form.full_name.id_for_label }}">Full Name</label>
+                        {{ profile_form.full_name }}
+                    </div>
+
+                    <div class="form-group">
+                        <label>Role</label>
+                        <input type="text" class="form-control" value="{% if staff_user %}{{ staff_user.role }}{% endif %}" readonly>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ profile_form.email.id_for_label }}">Email</label>
+                        {{ profile_form.email }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ profile_form.department.id_for_label }}">Department</label>
+                        {{ profile_form.department }}
+                    </div>
+                </div>
+
+                <div class="settings-action-row">
+                    <span class="settings-action-note"><i class="fas fa-circle-info"></i>Profile changes update how you appear in the workspace.</span>
+                    <button type="submit" class="save-btn settings-primary-btn">Save Changes</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="settings-stack-card preferences-card" id="preferences-settings">
+            <div class="settings-section-head">
+                <div>
+                    <span class="section-kicker">Workspace preferences</span>
+                    <h2>Notifications and interface</h2>
+                    <p>Choose alerts and interface options.</p>
+                </div>
+            </div>
+
+            <form method="post" class="settings-preferences-form">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="preferences">
+
+                <div class="settings-list modern-settings-list">
+                    <div class="setting-item modern-setting-item static-item">
+                        <div>
+                            <h4>Workspace Name</h4>
+                            <p>PPBMED Document Tracking System</p>
+                        </div>
+                        <span class="settings-badge static-badge">Active</span>
+                    </div>
+
+                    <div class="setting-item modern-setting-item static-item">
+                        <div>
+                            <h4>Directorate</h4>
+                            <p>Ministry of the Interior</p>
+                        </div>
+                        <span class="settings-badge static-badge secondary">Official</span>
+                    </div>
+
+                    <div class="setting-item modern-setting-item toggle-item" id="email-notifications-setting">
+                        <div>
+                            <h4>Email Notifications</h4>
+                            <p>Receive updates for assigned documents and routing actions.</p>
+                        </div>
+                        <label class="switch modern-switch">
+                            {{ preference_form.email_notifications }}
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item modern-setting-item toggle-item" id="sound-alerts-setting">
+                        <div>
+                            <h4>Sound Alerts</h4>
+                            <p>Play a sound when a new notification arrives.</p>
+                        </div>
+                        <label class="switch modern-switch">
+                            {{ preference_form.sound_alerts }}
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="setting-item modern-setting-item toggle-item" id="dark-mode-setting">
+                        <div>
+                            <h4>Dark Mode</h4>
+                            <p>Enable dark interface mode for the dashboard.</p>
+                        </div>
+                        <label class="switch modern-switch">
+                            {{ preference_form.dark_mode }}
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-action-row compact-row">
+                    <button type="submit" class="save-btn settings-primary-btn">Save Preferences</button>
+                    <button type="button" class="settings-secondary-btn" onclick="window.location.reload()">Discard</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="settings-stack-card security-card" id="security-settings">
+            <div class="settings-section-head">
+                <div>
+                    <span class="section-kicker">Security</span>
+                    <h2>Password and linked account</h2>
+                    <p>Update your password and review the linked account.</p>
+                </div>
+            </div>
+
+            <form method="post" class="document-form settings-form-grid">
+                {% csrf_token %}
+                <input type="hidden" name="action" value="password">
+
+                <div class="form-grid settings-form-fields security-fields">
+                    <div class="form-group">
+                        <label for="{{ password_form.current_password.id_for_label }}">Current Password</label>
+                        {{ password_form.current_password }}
+                        {% if password_form.current_password.errors %}
+                            <small class="field-error">{{ password_form.current_password.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ password_form.new_password.id_for_label }}">New Password</label>
+                        {{ password_form.new_password }}
+                        {% if password_form.new_password.errors %}
+                            <small class="field-error">{{ password_form.new_password.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ password_form.confirm_password.id_for_label }}">Confirm New Password</label>
+                        {{ password_form.confirm_password }}
+                        {% if password_form.confirm_password.errors %}
+                            <small class="field-error">{{ password_form.confirm_password.errors|striptags }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="settings-security-panel">
+                    <div class="settings-security-item">
+                        <div>
+                            <h4>Linked Login Account</h4>
+                            <p>
+                                {% if staff_user and staff_user.user %}
+                                    Connected to username: <strong>{{ staff_user.user.username }}</strong>
+                                {% else %}
+                                    No linked login account
+                                {% endif %}
+                            </p>
+                        </div>
+                        <span class="settings-badge static-badge {% if not staff_user or not staff_user.user %}secondary{% endif %}">
+                            {% if staff_user and staff_user.user %}Linked{% else %}None{% endif %}
+                        </span>
+                    </div>
+
+                    <div class="settings-security-item">
+                        <div>
+                            <h4>Automatic Session Timeout</h4>
+                            <p>Your session will expire after {{ session_idle_timeout_minutes }} minute{{ session_idle_timeout_minutes|pluralize }} of inactivity for account protection.</p>
+                        </div>
+                        <span class="settings-badge static-badge secondary">Enabled</span>
+                    </div>
+                </div>
+
+                <div class="settings-action-row compact-row">
+                    <button type="submit" class="settings-action-btn settings-primary-btn">Change Password</button>
+                </div>
+            </form>
+        </section>
+
+        <section class="settings-stack-card role-access-card" id="role-access-settings">
+            <div class="settings-section-head">
+                <div>
+                    <span class="section-kicker">Role access</span>
+                    <h2>Your current permissions</h2>
+                    <p>Review what your role can use right now.</p>
+                </div>
+            </div>
+
+            <div class="role-access-hero">
+                <div>
+                    <span class="role-access-label">Active role</span>
+                    <strong>{% if staff_user %}{{ staff_user.role }}{% else %}General{% endif %}</strong>
+                    <p>These permissions follow your current role.</p>
+                </div>
+                <span class="settings-badge static-badge">Live Access Rules</span>
+            </div>
+
+            <div class="role-access-list">
+                {% for item in enabled_permission_items %}
+                    <div class="role-access-item">
+                        <div class="role-access-icon">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <p><strong>{{ item.label }}</strong><br>{{ item.description }}</p>
+                    </div>
+                {% empty %}
+                    <div class="role-access-item">
+                        <div class="role-access-icon">
+                            <i class="fas fa-circle-info"></i>
+                        </div>
+                        <p>No role summary is available for this account yet.</p>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div class="settings-security-panel governance-panel">
+                <div class="settings-section-head" style="margin-bottom:14px;">
+                    <div>
+                        <span class="section-kicker">Control model</span>
+                        <h2 style="font-size:1.25rem; margin-bottom:6px;">System control model</h2>
+                        <p>Application control and server control should stay separate.</p>
+                    </div>
+                </div>
+
+                <div class="role-access-list">
+                    {% for item in control_governance_summary %}
+                    <div class="role-access-item governance-item">
+                        <div class="role-access-icon">
+                            <i class="fas fa-shield"></i>
+                        </div>
+                        <p>
+                            <strong>{{ item.title }}</strong><br>
+                            <span class="governance-scope">{{ item.scope }}</span><br>
+                            {{ item.detail }}
+                        </p>
+                        <span class="settings-badge static-badge">{{ item.badge }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {% if role == "Admin" %}
+            <div class="settings-action-row">
+                <p class="settings-action-note">
+                    <i class="fas fa-shield-halved"></i>
+                    IT/Admin can update these permissions centrally.
+                </p>
+                <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                    <a href="{% url 'role_permissions' %}" class="settings-action-btn">Manage Role Permissions</a>
+                </div>
+            </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const navItems = document.querySelectorAll('.settings-nav-item');
+        const sections = document.querySelectorAll('#account-settings, #preferences-settings, #security-settings, #role-access-settings');
+        const metricCards = document.querySelectorAll('.settings-metric-card[data-settings-target]');
+        const validSectionIds = new Set(Array.from(sections).map(section => section.id));
+        const darkModeInput = document.getElementById('{{ preference_form.dark_mode.id_for_label }}');
+
+        function showSection(sectionId, updateHash = true) {
+            const targetId = validSectionIds.has(sectionId) ? sectionId : 'account-settings';
+
+            sections.forEach(section => {
+                const isActive = section.id === targetId;
+                section.hidden = !isActive;
+                section.classList.toggle('is-active', isActive);
+            });
+
+            navItems.forEach(item => {
+                item.classList.toggle('active', item.dataset.settingsTarget === targetId);
+            });
+
+            if (updateHash && window.location.hash !== '#' + targetId) {
+                window.history.replaceState(null, '', '#' + targetId);
+            }
+        }
+
+        function getSectionIdFromHash() {
+            const hashId = window.location.hash.replace('#', '');
+            return validSectionIds.has(hashId) ? hashId : 'account-settings';
+        }
+
+        navItems.forEach(item => {
+            item.addEventListener('click', function (event) {
+                event.preventDefault();
+                showSection(item.dataset.settingsTarget);
+            });
+        });
+
+        metricCards.forEach(card => {
+            card.addEventListener('click', function (event) {
+                event.preventDefault();
+                showSection(card.dataset.settingsTarget);
+            });
+        });
+
+        if (darkModeInput) {
+            darkModeInput.addEventListener('change', function () {
+                document.body.classList.toggle('theme-dark', darkModeInput.checked);
+            });
+        }
+
+        showSection(getSectionIdFromHash(), false);
+        window.addEventListener('hashchange', function () {
+            showSection(getSectionIdFromHash(), false);
+        });
+    });
+</script>
+{% endblock %}

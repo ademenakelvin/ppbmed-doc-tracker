@@ -1,0 +1,195 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Messages | PPBMED{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}?v=20260331a">
+<link rel="stylesheet" href="{% static 'coreapp/css/messages.css' %}?v=20260401d">
+{% endblock %}
+{% block page_title %}Messages{% endblock %}
+{% block page_subtitle %}Chat-style staff inbox.{% endblock %}
+
+{% block content %}
+<div class="message-app-shell">
+    <aside class="message-sidebar card records-card">
+        <div class="message-sidebar-head">
+            <div>
+                <span class="message-sidebar-kicker">Inbox</span>
+                <h2>Chats</h2>
+                <p>{{ conversation_count }} conversation{{ conversation_count|pluralize }} / {{ unread_message_count }} unread</p>
+            </div>
+            {% if can_start_messages %}
+            <a href="{% url 'messages' %}?compose=1" class="message-sidebar-action">New</a>
+            {% endif %}
+        </div>
+
+        {% if can_start_messages %}
+        <details class="message-compose-drawer" {% if show_compose_panel %}open{% endif %}>
+            <summary>Start a new message</summary>
+            <div class="message-compose-drawer-body">
+                {% if form.non_field_errors %}
+                <div class="message-alert error">
+                    <i class="fas fa-circle-exclamation"></i>
+                    <div>
+                        {% for error in form.non_field_errors %}
+                        <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" class="document-form message-compose-form">
+                    {% csrf_token %}
+
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label for="{{ form.subject.id_for_label }}">Subject</label>
+                            {{ form.subject }}
+                            {% if form.subject.errors %}<small class="field-error">{{ form.subject.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="{{ form.recipients.id_for_label }}">Recipients</label>
+                            {{ form.recipients }}
+                            {% if form.recipients.errors %}<small class="field-error">{{ form.recipients.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="{{ form.body.id_for_label }}">Message</label>
+                            {{ form.body }}
+                            {% if form.body.errors %}<small class="field-error">{{ form.body.errors|striptags }}</small>{% endif %}
+                        </div>
+
+                        <div class="form-group full-width">
+                            <label for="{{ form.attachment.id_for_label }}">Attachment</label>
+                            {{ form.attachment }}
+                            <small class="field-hint">Images, PDF, Word, Excel, PowerPoint, text, CSV, and ZIP files are supported.</small>
+                            {% if form.attachment.errors %}<small class="field-error">{{ form.attachment.errors|striptags }}</small>{% endif %}
+                        </div>
+                    </div>
+
+                    <div class="message-compose-actions">
+                        <span class="message-compose-note">Send a new message with text, a file, or both.</span>
+                        <button type="submit" class="save-btn">Send</button>
+                    </div>
+                </form>
+            </div>
+        </details>
+        {% endif %}
+
+        <div class="conversation-list">
+            {% if conversation_list %}
+                {% for conversation in conversation_list %}
+                <a href="{% url 'messages' %}?with={{ conversation.counterpart.pk }}" class="conversation-row {% if conversation.is_selected %}is-active{% endif %}">
+                    <div class="conversation-avatar">
+                        {{ conversation.counterpart.full_name|slice:":1"|upper }}
+                    </div>
+
+                    <div class="conversation-copy">
+                        <div class="conversation-topline">
+                            <h3>{{ conversation.counterpart.full_name }}</h3>
+                            <span>{{ conversation.last_at|date:"M d" }}</span>
+                        </div>
+                        <p class="conversation-role">
+                            {{ conversation.counterpart.role }}{% if conversation.counterpart.department %} / {{ conversation.counterpart.department }}{% endif %}
+                        </p>
+                        <p class="conversation-preview">
+                            {% if conversation.last_direction == 'outgoing' %}<strong>You:</strong> {% endif %}
+                            {{ conversation.last_preview|default:conversation.last_subject }}
+                        </p>
+                    </div>
+
+                    {% if conversation.unread_count %}
+                    <span class="conversation-unread">{{ conversation.unread_count }}</span>
+                    {% endif %}
+                </a>
+                {% endfor %}
+            {% else %}
+            <div class="conversation-empty">
+                <div class="conversation-empty-icon"><i class="fas fa-comments"></i></div>
+                <h3>No chats yet</h3>
+                <p>Use the new message form to start the first conversation.</p>
+            </div>
+            {% endif %}
+        </div>
+    </aside>
+
+    <section class="message-chat-panel card records-card">
+        {% if active_conversation %}
+        <header class="chat-thread-head">
+            <div class="chat-thread-person">
+                <div class="conversation-avatar large">
+                    {{ active_conversation.counterpart.full_name|slice:":1"|upper }}
+                </div>
+                <div>
+                    <h2>{{ active_conversation.counterpart.full_name }}</h2>
+                    <p>
+                        {{ active_conversation.counterpart.role }}{% if active_conversation.counterpart.department %} / {{ active_conversation.counterpart.department }}{% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <div class="chat-thread-stats">
+                <span class="chat-thread-pill">{{ active_conversation.unread_count }} unread</span>
+                <span class="chat-thread-pill muted">{{ sent_message_count }} sent total</span>
+            </div>
+        </header>
+
+        <div class="chat-thread-stream">
+            {% for entry in active_messages %}
+            <div class="chat-message-row {% if entry.direction == 'outgoing' %}is-mine{% else %}is-theirs{% endif %}">
+                <article class="chat-message-bubble">
+                    <span class="chat-message-subject">{{ entry.subject }}</span>
+                    {% if entry.attachment %}
+                    <div class="chat-attachment-wrap">
+                        {% if entry.attachment.is_image %}
+                        <a href="{{ entry.attachment.url }}" target="_blank" rel="noopener" class="chat-image-link">
+                            <img src="{{ entry.attachment.url }}" alt="{{ entry.attachment.name }}" class="chat-image-preview">
+                        </a>
+                        {% else %}
+                        <a href="{{ entry.attachment.url }}" target="_blank" rel="noopener" class="chat-attachment-chip">
+                            <i class="fas fa-paperclip"></i>
+                            <span>{{ entry.attachment.name }}</span>
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    {% if entry.body %}
+                    <p>{{ entry.body|linebreaksbr }}</p>
+                    {% endif %}
+                    <div class="chat-message-meta">
+                        <span>{{ entry.created_at|date:"M d, Y H:i" }}</span>
+                        {% if entry.direction == 'incoming' and not entry.is_read %}
+                        <a href="{% url 'mark_message_read' entry.pk %}?with={{ active_conversation.counterpart.pk }}" class="chat-inline-action">Mark read</a>
+                        {% endif %}
+                    </div>
+                </article>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="chat-compose-wrap">
+            <form method="post" enctype="multipart/form-data" action="{% url 'send_chat_message' active_conversation.counterpart.pk %}" class="chat-compose-form">
+                {% csrf_token %}
+                <label for="chat-body">Message {{ active_conversation.counterpart.full_name }}</label>
+                <textarea id="chat-body" name="body" class="form-control" rows="4" placeholder="Write a message..."></textarea>
+                <div class="chat-upload-row">
+                    <label for="chat-attachment" class="chat-upload-label">Attach file</label>
+                    <input id="chat-attachment" name="attachment" type="file" class="form-control" accept="{{ message_attachment_accept }}">
+                </div>
+                <div class="chat-compose-actions">
+                    <span class="chat-compose-note">You can send text, images, documents, spreadsheets, presentations, and ZIP files.</span>
+                    <button type="submit" class="save-btn">Send</button>
+                </div>
+            </form>
+        </div>
+        {% else %}
+        <div class="chat-empty-state">
+            <div class="chat-empty-orb"><i class="fas fa-paper-plane"></i></div>
+            <h2>Select a chat</h2>
+            <p>Choose a conversation on the left or start a new message to open a chat thread.</p>
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

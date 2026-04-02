@@ -1,0 +1,588 @@
+/* Shared simplification pass for internal pages. */
+
+.main-content {
+    padding: 20px;
+}
+
+.topbar {
+    margin-bottom: 18px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.topbar h1 {
+    margin-bottom: 4px;
+    font-size: 28px;
+}
+
+.topbar p {
+    font-size: 14px;
+}
+
+.search-box,
+.documents-search-box,
+.documents-select,
+.form-control,
+.profile-btn,
+.icon-btn,
+.account-dropdown,
+.action-menu,
+.documents-filter-btn,
+.documents-reset-btn,
+.save-btn,
+.settings-action-btn,
+.action-link-btn,
+.hero-action-btn,
+.records-hero-action,
+.mailbox-toolbar-btn,
+.staff-cancel-link,
+.route-back-link,
+.route-cancel-link {
+    border-radius: 6px !important;
+    box-shadow: none !important;
+}
+
+.card,
+.records-card,
+.dashboard-section-card,
+.document-entry-card,
+.staff-form-card,
+.route-card,
+.settings-stack-card,
+.settings-nav-card,
+.settings-metric-card,
+.notifications-mailbox,
+.reports-highlight-card,
+.reports-chart-card,
+.reports-data-card,
+.reports-workload-table-card,
+.reports-kpi-card,
+.intake-side-panel,
+.hero-insight-card,
+.hero-panel-card,
+.route-stat-card {
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+}
+
+.large-card {
+    min-height: 0;
+}
+
+.card-header,
+.records-card-header,
+.dashboard-section-header,
+.notifications-mailbox-toolbar,
+.document-entry-header,
+.staff-form-header,
+.route-header {
+    padding: 14px 16px !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    background: transparent !important;
+}
+
+.card-header h2,
+.records-card-header h2,
+.dashboard-section-header h2 {
+    font-size: 18px !important;
+}
+
+.panel-body,
+.quick-actions,
+.reports-highlight-list,
+.reports-direction-grid,
+.reports-chart-body,
+.chart-card-body,
+.notifications-list-wrap,
+.pagination-wrap {
+    padding: 14px 16px !important;
+}
+
+.data-panel-card {
+    overflow: hidden;
+}
+
+.records-section-eyebrow,
+.records-panel-pill,
+.reports-section-eyebrow,
+.document-entry-chip,
+.staff-form-chip,
+.side-kicker,
+.dashboard-hero-badge,
+.records-badge,
+.reports-badge-pill {
+    display: none !important;
+}
+
+/* Hide large hero cards and keep only useful actions where available. */
+.dashboard-hero {
+    display: block !important;
+    margin-bottom: 12px !important;
+    padding: 0 !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+    color: inherit !important;
+}
+
+.dashboard-hero::before,
+.records-workspace-hero::before,
+.reports-hero-panel::before {
+    display: none !important;
+}
+
+.dashboard-hero-copy h2,
+.dashboard-hero-copy > p,
+.dashboard-hero-panel,
+.hero-panel-card,
+.records-workspace-copy,
+.records-hero-summary,
+.reports-hero-panel,
+.document-entry-hero,
+.document-entry-sidebar,
+.staff-form-hero,
+.route-hero {
+    display: none !important;
+}
+
+.dashboard-hero-actions,
+.records-workspace-side {
+    display: flex !important;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 0 !important;
+}
+
+.records-workspace-hero {
+    display: block !important;
+    margin-bottom: 8px !important;
+    padding: 0 !important;
+    background: none !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
+.records-workspace-side {
+    align-content: stretch !important;
+}
+
+.records-workspace-side .records-hero-summary {
+    display: none !important;
+}
+
+.document-entry-layout,
+.content-grid,
+.reports-overview-grid,
+.reports-table-grid {
+    grid-template-columns: 1fr !important;
+    gap: 16px !important;
+}
+
+.side-panels {
+    gap: 16px;
+}
+
+/* Convert colored metric cards into simple rows. */
+.stats-grid,
+.documents-summary-grid,
+.reports-kpi-grid {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)) !important;
+    gap: 12px !important;
+    margin-bottom: 16px !important;
+}
+
+.stats-grid > *,
+.documents-summary-grid > *,
+.reports-kpi-grid > * {
+    display: block !important;
+    min-height: 0 !important;
+    padding: 14px 16px !important;
+    margin: 0 !important;
+    background: #ffffff !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 8px !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+    overflow: hidden !important;
+}
+
+.stats-grid > *:last-child,
+.documents-summary-grid > *:last-child,
+.reports-kpi-grid > *:last-child {
+    border-bottom: 1px solid #e5e7eb !important;
+}
+
+.stat-card::after,
+.stat-icon,
+.stat-card-top,
+.stat-trend,
+.mini-stat-icon,
+.reports-kpi-top,
+.reports-kpi-copy span,
+.reports-kpi-tag,
+.reports-highlight-icon,
+.notice-icon,
+.action-icon,
+.document-entry-badge,
+.entry-point-icon,
+.physical-flow-number,
+.upload-dropzone-icon,
+.settings-nav-item i {
+    display: none !important;
+}
+
+.stat-copy,
+.mini-stat-text,
+.reports-kpi-copy {
+    display: block !important;
+    width: 100% !important;
+}
+
+.stat-copy h3,
+.mini-stat-text h3,
+.reports-kpi-copy h3 {
+    margin: 0 !important;
+    font-size: 28px !important;
+    line-height: 1 !important;
+    color: #0f172a !important;
+}
+
+.stat-copy p,
+.mini-stat-text p,
+.reports-kpi-copy p {
+    margin: 0 0 8px !important;
+    font-size: 13px !important;
+    color: #475569 !important;
+}
+
+.documents-new-btn-wrap {
+    display: block !important;
+}
+
+.documents-new-btn {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: auto !important;
+    min-height: 40px !important;
+    padding: 0 14px !important;
+    background: #1d4ed8 !important;
+    border: 1px solid #1d4ed8 !important;
+    border-radius: 6px !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+}
+
+/* Simplify lists and panels. */
+.notice-item,
+.action-box,
+.reports-highlight-item,
+.reports-direction-card,
+.setting-item,
+.settings-security-item,
+.role-access-item,
+.role-access-hero,
+.governance-item {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 10px 0 !important;
+}
+
+.notice-item:last-child,
+.action-box:last-child,
+.reports-highlight-item:last-child,
+.reports-direction-card:last-child,
+.setting-item:last-child,
+.settings-security-item:last-child,
+.role-access-item:last-child,
+.governance-item:last-child {
+    border-bottom: 0 !important;
+}
+
+.action-box,
+.notice-item {
+    transform: none !important;
+}
+
+.action-left {
+    gap: 0 !important;
+}
+
+.reports-highlight-list,
+.reports-direction-grid,
+.role-access-list,
+.settings-list,
+.settings-security-panel {
+    gap: 0 !important;
+}
+
+.reports-direction-card span,
+.reports-direction-card strong,
+.reports-direction-card p {
+    color: inherit !important;
+}
+
+.reports-direction-card strong {
+    font-size: 18px !important;
+    margin: 0 !important;
+}
+
+/* Flatten filters and forms. */
+.modern-filter-bar {
+    padding: 0 !important;
+    background: transparent !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+}
+
+.form-section,
+.checkbox-tile {
+    background: transparent !important;
+    border: 0 !important;
+    border-top: 1px solid #e5e7eb !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 16px 0 !important;
+}
+
+.staff-form-layout > .form-section:first-child,
+.document-entry-form > .form-section:first-child {
+    border-top: 0 !important;
+}
+
+.document-entry-card .panel-body,
+.staff-form-card .panel-body,
+.route-card .panel-body {
+    padding: 14px 16px !important;
+}
+
+.staff-form-actions,
+.route-actions,
+.settings-action-row {
+    justify-content: flex-start !important;
+}
+
+.settings-shell {
+    max-width: none !important;
+}
+
+.settings-workspace {
+    grid-template-columns: 220px 1fr !important;
+    gap: 16px !important;
+}
+
+.settings-sidebar {
+    position: static !important;
+}
+
+.settings-profile-card {
+    display: none !important;
+}
+
+.settings-nav-card {
+    padding: 10px 16px !important;
+}
+
+.settings-nav-item {
+    background: transparent !important;
+    border: 0 !important;
+    border-bottom: 1px solid #e5e7eb !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    padding: 10px 0 !important;
+    transform: none !important;
+}
+
+.settings-nav-item:last-child {
+    border-bottom: 0 !important;
+}
+
+.settings-nav-item:hover {
+    box-shadow: none !important;
+}
+
+.settings-nav-item strong,
+.settings-nav-item span {
+    margin: 0 !important;
+}
+
+/* Notifications stay inbox-style but flatter. */
+.notifications-mailbox-toolbar,
+.notifications-mail-list-head {
+    background: transparent !important;
+}
+
+.notifications-mail-row,
+.notifications-mail-row.is-unread,
+.notifications-mail-row:hover {
+    background: transparent !important;
+}
+
+.mailbox-count-pill {
+    box-shadow: none !important;
+}
+
+/* Reduce decorative motion. */
+.menu-item:hover,
+.hero-action-btn:hover,
+.records-hero-action:hover,
+.documents-filter-btn:hover,
+.documents-reset-btn:hover,
+.action-link-btn:hover,
+.mailbox-toolbar-btn:hover,
+.profile-btn:hover,
+.icon-btn:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+.menu-item.active,
+.logo-box,
+.bell-badge,
+.menu-badge,
+.notification-toast,
+.pagination-current,
+.documents-summary-grid,
+.stats-grid,
+.content-grid,
+.table-wrap,
+.panel-body,
+.delete-box,
+.error-card {
+    animation: none !important;
+}
+
+/* Dark theme equivalents. */
+body.theme-dark .topbar {
+    border-bottom-color: #334155;
+}
+
+body.theme-dark .card,
+body.theme-dark .records-card,
+body.theme-dark .dashboard-section-card,
+body.theme-dark .document-entry-card,
+body.theme-dark .staff-form-card,
+body.theme-dark .route-card,
+body.theme-dark .settings-stack-card,
+body.theme-dark .settings-nav-card,
+body.theme-dark .notifications-mailbox,
+body.theme-dark .reports-highlight-card,
+body.theme-dark .reports-chart-card,
+body.theme-dark .reports-data-card,
+body.theme-dark .reports-workload-table-card,
+body.theme-dark .reports-kpi-card {
+    background: #111827 !important;
+    border-color: #334155 !important;
+}
+
+body.theme-dark .card-header,
+body.theme-dark .records-card-header,
+body.theme-dark .dashboard-section-header,
+body.theme-dark .notifications-mailbox-toolbar,
+body.theme-dark .document-entry-header,
+body.theme-dark .staff-form-header,
+body.theme-dark .route-header,
+body.theme-dark .pagination-wrap,
+body.theme-dark .notifications-mail-list-head,
+body.theme-dark .notifications-mail-row,
+body.theme-dark .notice-item,
+body.theme-dark .action-box,
+body.theme-dark .reports-highlight-item,
+body.theme-dark .reports-direction-card,
+body.theme-dark .setting-item,
+body.theme-dark .settings-security-item,
+body.theme-dark .role-access-item,
+body.theme-dark .role-access-hero,
+body.theme-dark .governance-item,
+body.theme-dark .form-section,
+body.theme-dark .checkbox-tile,
+body.theme-dark .settings-nav-item {
+    background: transparent !important;
+    border-color: #334155 !important;
+}
+
+body.theme-dark .stats-grid > *,
+body.theme-dark .documents-summary-grid > *,
+body.theme-dark .reports-kpi-grid > * {
+    background: #111827 !important;
+    border-color: #334155 !important;
+}
+
+body.theme-dark .topbar h1,
+body.theme-dark .card-header h2,
+body.theme-dark .records-card-header h2,
+body.theme-dark .dashboard-section-header h2,
+body.theme-dark .stat-copy h3,
+body.theme-dark .mini-stat-text h3,
+body.theme-dark .reports-kpi-copy h3,
+body.theme-dark .mail-row-subject,
+body.theme-dark .settings-nav-item strong {
+    color: #f8fafc !important;
+}
+
+body.theme-dark .topbar p,
+body.theme-dark .stat-copy p,
+body.theme-dark .mini-stat-text p,
+body.theme-dark .reports-kpi-copy p,
+body.theme-dark .notice-content p,
+body.theme-dark .mail-row-preview,
+body.theme-dark .mail-row-time,
+body.theme-dark .settings-nav-item span,
+body.theme-dark .data-panel-note {
+    color: #94a3b8 !important;
+}
+
+body.theme-dark .search-box,
+body.theme-dark .documents-search-box,
+body.theme-dark .documents-select,
+body.theme-dark .form-control,
+body.theme-dark .profile-btn,
+body.theme-dark .icon-btn,
+body.theme-dark .account-dropdown,
+body.theme-dark .action-menu,
+body.theme-dark .mailbox-count-pill {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+    color: #e2e8f0 !important;
+}
+
+body.theme-dark .documents-new-btn,
+body.theme-dark .table-link,
+body.theme-dark .attachment-link,
+body.theme-dark .action-link-btn,
+body.theme-dark .mail-row-action-link,
+body.theme-dark .mailbox-toolbar-btn {
+    color: #93c5fd !important;
+}
+
+body.theme-dark .documents-filter-btn,
+body.theme-dark .documents-reset-btn,
+body.theme-dark .save-btn,
+body.theme-dark .settings-action-btn,
+body.theme-dark .action-link-btn,
+body.theme-dark .hero-action-btn,
+body.theme-dark .records-hero-action,
+body.theme-dark .mailbox-toolbar-btn {
+    background: #1d4ed8 !important;
+    border-color: #1d4ed8 !important;
+    color: #ffffff !important;
+}
+
+@media (max-width: 900px) {
+    .settings-workspace {
+        grid-template-columns: 1fr !important;
+    }
+
+    .stats-grid > *,
+    .documents-summary-grid > *,
+    .reports-kpi-grid > * {
+        padding: 12px 14px !important;
+    }
+}

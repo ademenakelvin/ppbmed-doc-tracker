@@ -1,0 +1,65 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome | PPBMED</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'coreapp/css/welcome.css' %}?v=20260331a">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+</head>
+<body>
+    <section class="welcome-page">
+        <div class="welcome-bg" ></div>
+        <div class="welcome-overlay"></div>
+
+        <div class="floating-shape shape-one"></div>
+        <div class="floating-shape shape-two"></div>
+        <div class="floating-shape shape-three"></div>
+
+        <div class="welcome-content">
+            <div class="welcome-badge animate-fade-up delay-1">
+                <i class="fas fa-landmark"></i>
+                <span>Ministry of the Interior</span>
+            </div>
+
+            <h1 class="welcome-title animate-fade-up delay-2">
+                PPBMED Document Tracking System
+            </h1>
+
+            <p class="welcome-text animate-fade-up delay-3">
+                Secure routing, tracking, and reporting for official documents.
+            </p>
+
+            <div class="welcome-meta animate-fade-up delay-4">
+                <div class="welcome-meta-card">
+                    <span>Routing</span>
+                    <strong>Live movement</strong>
+                </div>
+                <div class="welcome-meta-card">
+                    <span>Tracking</span>
+                    <strong>Clear history</strong>
+                </div>
+                <div class="welcome-meta-card">
+                    <span>Reports</span>
+                    <strong>Quick overview</strong>
+                </div>
+            </div>
+
+            <p class="welcome-support animate-fade-up delay-5">
+                Built for the Ministry of the Interior.
+            </p>
+
+            <div class="welcome-actions animate-fade-up delay-5">
+                <a href="{% url 'login' %}" class="welcome-login-btn">
+                    <span>Login</span>
+                    <i class="fas fa-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

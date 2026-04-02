@@ -1,0 +1,274 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Access History | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/records-pages.css' %}?v=20260330e">{% endblock %}
+{% block page_title %}Access History{% endblock %}
+{% block page_subtitle %}Director access to staff sign-in and sign-out activity.{% endblock %}
+
+{% block content %}
+<div class="records-page-shell">
+    <section class="records-workspace-hero">
+        <div class="records-workspace-copy">
+            <div class="records-badge"><i class="fas fa-clock-rotate-left"></i><span>Access audit</span></div>
+            <h2>Review who signed in or signed out, when they accessed the system, and from where.</h2>
+            <p>Use this audit view to monitor account activity, spot unusual access patterns, and confirm staff access usage over time.</p>
+        </div>
+
+        <div class="records-workspace-side">
+            <div class="records-hero-summary">
+                <span class="records-hero-summary-label">Today</span>
+                <strong>{{ login_today_count|add:logout_today_count }}</strong>
+                <p>access event{{ login_today_count|add:logout_today_count|pluralize }} recorded today.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="documents-summary-grid">
+        <div class="mini-stat-card blue">
+            <div class="mini-stat-icon"><i class="fas fa-clock-rotate-left"></i></div>
+            <div class="mini-stat-text">
+                <p>Total Activity</p>
+                <h3>{{ login_total_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card orange">
+            <div class="mini-stat-icon"><i class="fas fa-right-to-bracket"></i></div>
+            <div class="mini-stat-text">
+                <p>Logins Today</p>
+                <h3>{{ login_today_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card green">
+            <div class="mini-stat-icon"><i class="fas fa-right-from-bracket"></i></div>
+            <div class="mini-stat-text">
+                <p>Logouts Today</p>
+                <h3>{{ logout_today_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card red">
+            <div class="mini-stat-icon"><i class="fas fa-calendar-week"></i></div>
+            <div class="mini-stat-text">
+                <p>Last 7 Days</p>
+                <h3>{{ activity_week_count }}</h3>
+            </div>
+        </div>
+    </section>
+
+    <section class="documents-summary-grid">
+        <div class="mini-stat-card blue">
+            <div class="mini-stat-icon"><i class="fas fa-shield-halved"></i></div>
+            <div class="mini-stat-text">
+                <p>Audit Logs</p>
+                <h3>{{ audit_total_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card red">
+            <div class="mini-stat-icon"><i class="fas fa-user-lock"></i></div>
+            <div class="mini-stat-text">
+                <p>Failed Logins</p>
+                <h3>{{ failed_login_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card orange">
+            <div class="mini-stat-icon"><i class="fas fa-ban"></i></div>
+            <div class="mini-stat-text">
+                <p>Blocked Attempts</p>
+                <h3>{{ blocked_login_count }}</h3>
+            </div>
+        </div>
+
+        <div class="mini-stat-card blue">
+            <div class="mini-stat-icon"><i class="fas fa-key"></i></div>
+            <div class="mini-stat-text">
+                <p>2FA Problems</p>
+                <h3>{{ two_factor_failed_count|add:two_factor_blocked_count }}</h3>
+            </div>
+        </div>
+    </section>
+
+    <div class="card records-card data-panel-card">
+        <div class="card-header records-card-header data-panel-header">
+            <div>
+                <span class="records-section-eyebrow">Suspicious Auth</span>
+                <h2>Failed and blocked sign-in alerts</h2>
+            </div>
+            <span class="data-panel-note">{{ failed_login_count|add:blocked_login_count|add:two_factor_failed_count|add:two_factor_blocked_count }} alert{{ failed_login_count|add:blocked_login_count|add:two_factor_failed_count|add:two_factor_blocked_count|pluralize }}</span>
+        </div>
+
+        <div class="table-wrap modern-table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Actor</th>
+                        <th>Alert</th>
+                        <th>Target</th>
+                        <th>Details</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if recent_suspicious_logs %}
+                        {% for item in recent_suspicious_logs %}
+                        <tr>
+                            <td>{% if item.actor %}{{ item.actor.full_name }}{% else %}-{% endif %}</td>
+                            <td><span class="table-badge badge-red">{{ item.action }}</span></td>
+                            <td>{{ item.target_label }}</td>
+                            <td>{{ item.details|default:"-"|truncatechars:110 }}</td>
+                            <td>{{ item.created_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="empty-row">No failed or blocked sign-in alerts found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card records-card data-panel-card">
+        <div class="card-header records-card-header data-panel-header">
+            <div>
+                <span class="records-section-eyebrow">Audit trail</span>
+                <h2>Recent access activity</h2>
+            </div>
+            <span class="data-panel-note">{{ login_total_count }} recorded events</span>
+        </div>
+
+        <div class="panel-body data-panel-toolbar">
+            <form method="get" class="documents-top-filter modern-filter-bar">
+                <div class="documents-search-box">
+                    <i class="fas fa-search"></i>
+                    <input type="text" name="search" placeholder="Search by user, role, or IP address..." value="{{ search_query }}">
+                </div>
+
+                <select name="event" class="documents-select">
+                    <option value="">Event: All</option>
+                    <option value="login" {% if event_filter == "login" %}selected{% endif %}>Login</option>
+                    <option value="logout" {% if event_filter == "logout" %}selected{% endif %}>Logout</option>
+                </select>
+
+                <input type="date" name="date_from" class="documents-select" value="{{ date_from }}">
+                <input type="date" name="date_to" class="documents-select" value="{{ date_to }}">
+
+                <button type="submit" class="documents-filter-btn">
+                    <i class="fas fa-sliders-h"></i>
+                    <span>Search</span>
+                </button>
+
+                <a href="{% url 'export_login_history_csv' %}?search={{ search_query|urlencode }}&event={{ event_filter|urlencode }}&date_from={{ date_from|urlencode }}&date_to={{ date_to|urlencode }}" class="documents-reset-btn">Export Logins</a>
+                <a href="{% url 'export_audit_logs_csv' %}?search={{ search_query|urlencode }}&date_from={{ date_from|urlencode }}&date_to={{ date_to|urlencode }}" class="documents-reset-btn">Export Audit</a>
+                <a href="{% url 'login_history' %}" class="documents-reset-btn">Reset</a>
+            </form>
+        </div>
+
+        <div class="table-wrap modern-table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Staff</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>IP Address</th>
+                        <th>Device / Browser</th>
+                        <th>Activity Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if login_entries %}
+                        {% for item in login_entries %}
+                        <tr>
+                            <td>
+                                <span class="table-badge {% if item.event_type == 'logout' %}badge-red{% else %}badge-green{% endif %}">
+                                    {{ item.get_event_type_display }}
+                                </span>
+                            </td>
+                            <td>{% if item.staff %}{{ item.staff.full_name }}{% else %}-{% endif %}</td>
+                            <td>{{ item.username }}</td>
+                            <td>{{ item.role|default:"-" }}</td>
+                            <td>{{ item.ip_address|default:"-" }}</td>
+                            <td>{{ item.user_agent|default:"-"|truncatechars:80 }}</td>
+                            <td>{{ item.logged_in_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="7" class="empty-row">No access history found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+
+        {% if login_entries.has_other_pages %}
+        <div class="pagination-wrap">
+            <div class="pagination-info">Page {{ login_entries.number }} of {{ login_entries.paginator.num_pages }}</div>
+            <div class="pagination-controls">
+                {% if login_entries.has_previous %}
+                    <a href="?page=1{% if search_query %}&search={{ search_query }}{% endif %}{% if event_filter %}&event={{ event_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="pagination-btn">First</a>
+                    <a href="?page={{ login_entries.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if event_filter %}&event={{ event_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="pagination-btn">Previous</a>
+                {% endif %}
+
+                <span class="pagination-current">{{ login_entries.number }}</span>
+
+                {% if login_entries.has_next %}
+                    <a href="?page={{ login_entries.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if event_filter %}&event={{ event_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="pagination-btn">Next</a>
+                    <a href="?page={{ login_entries.paginator.num_pages }}{% if search_query %}&search={{ search_query }}{% endif %}{% if event_filter %}&event={{ event_filter }}{% endif %}{% if date_from %}&date_from={{ date_from }}{% endif %}{% if date_to %}&date_to={{ date_to }}{% endif %}" class="pagination-btn">Last</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <div class="card records-card data-panel-card">
+        <div class="card-header records-card-header data-panel-header">
+            <div>
+                <span class="records-section-eyebrow">Security log</span>
+                <h2>Recent system changes</h2>
+            </div>
+            <span class="data-panel-note">{{ audit_total_count }} tracked actions</span>
+        </div>
+
+        <div class="table-wrap modern-table-wrap">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Actor</th>
+                        <th>Action</th>
+                        <th>Target Type</th>
+                        <th>Target</th>
+                        <th>Details</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if recent_audit_logs %}
+                        {% for item in recent_audit_logs %}
+                        <tr>
+                            <td>{% if item.actor %}{{ item.actor.full_name }}{% else %}-{% endif %}</td>
+                            <td>{{ item.action }}</td>
+                            <td>{{ item.target_type }}</td>
+                            <td>{{ item.target_label }}</td>
+                            <td>{{ item.details|default:"-"|truncatechars:90 }}</td>
+                            <td>{{ item.created_at|date:"M d, Y H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="empty-row">No system audit events found.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

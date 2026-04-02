@@ -1,0 +1,148 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Edit Document | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/edit-document.css' %}?v=20260330d">{% endblock %}
+{% block page_title %}Edit Document{% endblock %}
+{% block page_subtitle %}Update a document record.{% endblock %}
+
+{% block content %}
+<section class="edit-document-hero">
+    <div class="edit-document-copy">
+        <div class="edit-document-badge">
+            <i class="fas fa-file-pen"></i>
+            <span>Document maintenance</span>
+        </div>
+        <h2>Edit {{ document.reference_id }}.</h2>
+        <p>Update details, dates, ownership, or attachment.</p>
+    </div>
+    <div class="edit-document-side">
+        <div class="document-side-card">
+            <strong>Current status</strong>
+            <p>{{ document.status }} / {{ document.priority }}</p>
+        </div>
+        <div class="document-side-card subtle">
+            <strong>Assigned officer</strong>
+            <p>{% if document.assigned_to %}{{ document.assigned_to.full_name }}{% else %}Unassigned{% endif %}</p>
+        </div>
+    </div>
+</section>
+
+<div class="card edit-document-card">
+    <div class="card-header edit-document-header">
+        <div>
+            <h2>Edit {{ document.reference_id }}</h2>
+            <p>Review changes before saving.</p>
+        </div>
+        <div class="document-edit-chip">
+            <i class="fas fa-file-shield"></i>
+            <span>Tracked revision</span>
+        </div>
+    </div>
+
+    <div class="panel-body">
+        <form method="post" enctype="multipart/form-data" class="document-form edit-document-form">
+            {% csrf_token %}
+
+            <section class="form-section">
+                <div class="form-section-heading">
+                    <h3>Core Details</h3>
+                    <p>Update the main document details.</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.reference_id.id_for_label }}">Reference ID</label>
+                        {{ form.reference_id }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.subject.id_for_label }}">Subject</label>
+                        {{ form.subject }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.direction.id_for_label }}">Direction</label>
+                        {{ form.direction }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.document_type.id_for_label }}">Document Type</label>
+                        {{ form.document_type }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.department.id_for_label }}">Owning Department</label>
+                        {{ form.department }}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="{{ form.description.id_for_label }}">Description</label>
+                        {{ form.description }}
+                    </div>
+                </div>
+            </section>
+
+            <section class="form-section">
+                <div class="form-section-heading">
+                    <h3>Routing and Timeline</h3>
+                    <p>Adjust ownership, dates, and attachment if needed.</p>
+                </div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.origin.id_for_label }}">Origin</label>
+                        {{ form.origin }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.destination.id_for_label }}">Destination</label>
+                        {{ form.destination }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.assigned_to.id_for_label }}">Assigned To</label>
+                        {{ form.assigned_to }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.priority.id_for_label }}">Priority</label>
+                        {{ form.priority }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.status.id_for_label }}">Status</label>
+                        {{ form.status }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.date_received.id_for_label }}">Date Received</label>
+                        {{ form.date_received }}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.due_date.id_for_label }}">Due Date</label>
+                        {{ form.due_date }}
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="{{ form.attachment.id_for_label }}">Letter Attachment</label>
+                        {{ form.attachment }}
+                        {% if document.attachment %}
+                            <small class="field-hint">
+                                Current file:
+                                <a href="{% url 'download_document_attachment' document.pk %}" target="_blank">Open attachment</a>
+                            </small>
+                        {% endif %}
+                    </div>
+                </div>
+            </section>
+
+            <div class="form-actions edit-document-actions">
+                <a href="{% url 'document_detail' document.pk %}" class="document-cancel-link">Cancel</a>
+                <button type="submit" class="save-btn document-save-btn">Update Document</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

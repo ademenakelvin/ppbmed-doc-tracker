@@ -1,0 +1,150 @@
+{% extends 'coreapp/base.html' %}
+{% load static %}
+
+{% block title %}Document Detail | PPBMED{% endblock %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'coreapp/css/document-detail.css' %}?v=20260330d">{% endblock %}
+{% block page_title %}Document Detail{% endblock %}
+{% block page_subtitle %}Document information and routing history.{% endblock %}
+
+{% block content %}
+<section class="detail-hero">
+    <div class="detail-hero-copy">
+        <div class="detail-badge">
+            <i class="fas fa-file-lines"></i>
+            <span>Document record</span>
+        </div>
+        <h2>{{ document.reference_id }}</h2>
+        <p>{{ document.subject }}</p>
+    </div>
+    <div class="detail-hero-actions">
+        {% if permission_flags.edit_document and not document.is_archived %}
+        <a href="{% url 'edit_document' document.pk %}" class="save-btn">Edit</a>
+        {% endif %}
+        {% if permission_flags.route_document and not document.is_archived %}
+        <a href="{% url 'route_document' document.pk %}" class="documents-filter-btn">Route</a>
+        {% endif %}
+        {% if permission_flags.export_document_pdf %}
+        <a href="{% url 'export_document_history_pdf' document.pk %}" class="documents-reset-btn">Export PDF</a>
+        {% endif %}
+        {% if permission_flags.delete_document %}
+            {% if document.is_archived %}
+            <a href="{% url 'restore_document' document.pk %}" class="documents-filter-btn">Restore</a>
+            {% else %}
+            <a href="{% url 'delete_document' document.pk %}" class="documents-reset-btn">Archive</a>
+            {% endif %}
+        {% endif %}
+    </div>
+</section>
+
+<div class="card detail-card">
+    <div class="card-header staff-header detail-card-header">
+        <h2>{{ document.reference_id }} - {{ document.subject }}</h2>
+        <span class="detail-status-chip">{{ document.status }} / {{ document.priority }}</span>
+    </div>
+
+    <div class="panel-body">
+        <div class="details-grid">
+            <div class="detail-item"><strong>Reference ID</strong><p>{{ document.reference_id }}</p></div>
+            <div class="detail-item"><strong>Subject</strong><p>{{ document.subject }}</p></div>
+            <div class="detail-item"><strong>Direction</strong><p>{{ document.direction }}</p></div>
+            <div class="detail-item"><strong>Document Type</strong><p>{{ document.document_type|default:"-" }}</p></div>
+            <div class="detail-item"><strong>Department</strong><p>{{ document.department|default:"-" }}</p></div>
+            <div class="detail-item"><strong>Origin</strong><p>{{ document.origin }}</p></div>
+            <div class="detail-item"><strong>Destination</strong><p>{{ document.destination }}</p></div>
+            <div class="detail-item"><strong>Assigned To</strong><p>{% if document.assigned_to %}{{ document.assigned_to.full_name }}{% else %}-{% endif %}</p></div>
+            <div class="detail-item"><strong>Priority</strong><p>{{ document.priority }}</p></div>
+            <div class="detail-item"><strong>Status</strong><p>{{ document.status }}</p></div>
+            <div class="detail-item"><strong>Lifecycle</strong><p>{% if document.is_archived %}Archived{% else %}Active{% endif %}</p></div>
+            <div class="detail-item"><strong>Date Received</strong><p>{{ document.date_received }}</p></div>
+            <div class="detail-item"><strong>Due Date</strong><p>{{ document.due_date|default:"-" }}</p></div>
+            <div class="detail-item">
+                <strong>Attachment</strong>
+                <p>
+                {% if document.attachment and permission_flags.view_document_attachment %}
+                    <a href="{% url 'download_document_attachment' document.pk %}" target="_blank" class="table-link strong-link">View Attachment</a>
+                {% elif document.attachment %}
+                    Restricted
+                {% else %}
+                    -
+                {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="description-box">
+            <strong>Description:</strong>
+            <p>{{ document.description|default:"No description provided." }}</p>
+        </div>
+    </div>
+</div>
+
+<div class="card detail-card">
+    <div class="card-header detail-card-header">
+        <h2>Workflow Tracker</h2>
+    </div>
+
+    <div class="panel-body">
+        <div class="workflow-tracker">
+            {% for step in workflow_steps %}
+            <div class="workflow-step {% if step.done %}done{% endif %} {% if step.active %}active{% endif %}">
+                <div class="workflow-circle">
+                    {% if step.done %}
+                        <i class="fas fa-check"></i>
+                    {% else %}
+                        {{ forloop.counter }}
+                    {% endif %}
+                </div>
+                <div class="workflow-label">{{ step.name }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="card detail-card">
+    <div class="card-header detail-card-header">
+        <h2>Routing History</h2>
+    </div>
+
+    <div class="table-wrap">
+        <table class="documents-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>From</th>
+                    <th>To</th>
+                    <th>Action</th>
+                    <th>Note</th>
+                    <th>Attachment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if routing_history %}
+                    {% for item in routing_history %}
+                    <tr>
+                        <td>{{ item.action_date }}</td>
+                        <td>{% if item.from_officer %}{{ item.from_officer.full_name }}{% else %}-{% endif %}</td>
+                        <td>{% if item.to_officer %}{{ item.to_officer.full_name }}{% else %}-{% endif %}</td>
+                        <td>{{ item.action }}</td>
+                        <td>{{ item.note|default:"-" }}</td>
+                        <td>
+                            {% if item.attachment and permission_flags.view_document_attachment %}
+                                <a href="{% url 'download_routing_attachment' item.pk %}" target="_blank" class="table-link strong-link">View</a>
+                            {% elif item.attachment %}
+                                Restricted
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="6" class="empty-row">No routing history yet.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
